@@ -307,6 +307,11 @@ class ESPSomfyController(DataUpdateCoordinator):
         """Start the firmware update process."""
         return await self.api.update_firmware(version)
 
+    async def fetch_release_notes(self, version: str) -> str | None:
+        """Passerelle pour récupérer les notes de version."""
+        return await self.api.fetch_release_notes(version)
+
+
     async def set_host(self, host) -> None:
         """Set a host name and reloads the sockets if the host has changed."""
         if self.api.get_host() != host:
@@ -911,6 +916,23 @@ class ESPSomfyAPI:
                     _LOGGER.error(await resp.text())
         except aiohttp.ClientError:
             pass
+
+    async def fetch_release_notes(self, version: str) -> str | None:
+        """Télécharge les notes de version depuis l'API GitHub."""
+        # Note : Si tu utilises ton propre fork, remplace rstrouse par ton pseudo GitHub
+        url = f"https://api.github.com/repos/xkain/TESTRTS/releases/tags/{version}"
+        headers = {"Accept": "application/vnd.github.v3+json"}
+        
+        try:
+            async with self._session.get(url, headers=headers, timeout=10) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    # Extrait le texte au format Markdown
+                    return data.get("body", "Aucune description disponible.")
+                return f"Impossible de charger les notes (Code GitHub : {response.status})"
+        except Exception as e:
+            _LOGGER.error("Erreur notes de version : %s", e)
+            return "Erreur lors de la récupération des notes de version."
 
 
 class InvalidHost(HomeAssistantError):

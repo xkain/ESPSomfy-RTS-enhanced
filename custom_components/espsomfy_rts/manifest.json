@@ -1,21 +1,21 @@
 {
   "domain": "espsomfy_rts",
   "name": "ESPSomfy RTS",
-  "codeowners": ["@rstrouse"],
+  "codeowners": ["@xkain"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/rstrouse/ESPSomfy-RTS/wiki/Configuring-the-Software",
+  "documentation": "https://github.com/xkain/ESPSomfy-RTS/wiki",
   "homekit": {},
   "integration_type": "hub",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/rstrouse/ESPSomfy-RTS/issues",
+  "issue_tracker": "https://github.com/xkain/ESPSomfy-RTS/issues",
   "requirements": ["websocket-client==1.8.0", "aiofiles"],
   "ssdp": [
     {
-      "deviceType": "urn:schemas-rstrouse-org:device:ESPSomfyRTS:1"
+      "deviceType": "urn:schemas-xkain:device:Somfy:1"
     }
   ],
-  "version": "2.4.7",
+  "version": "2.4.8",
   "zeroconf": [
     {
       "type": "_espsomfy_rts._tcp.local.",

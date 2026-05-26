@@ -59,8 +59,9 @@ async def async_setup_entry(
                 controller=controller,
                 cfg=ESPSomfyButtonDescription(
                     key="reboot",
+                    translation_key="reboot",
+                    has_entity_name=True,
                     entity_category=EntityCategory.CONFIG,
-                    name="Reboot ESP Device",
                     device_class=ButtonDeviceClass.RESTART,
                     events={},
                     action={"service": API_REBOOT},
@@ -75,8 +76,9 @@ async def async_setup_entry(
                 controller=controller,
                 cfg=ESPSomfyButtonDescription(
                     key="backup",
+                    translation_key="backup",
+                    has_entity_name=True,
                     entity_category=EntityCategory.CONFIG,
-                    name="Backup ESPSomfy RTS",
                     device_class=ButtonDeviceClass.IDENTIFY,
                     events={},
                     action={"apimethod": "create_backup"},
@@ -107,12 +109,17 @@ class ESPSomfyButton(ESPSomfyEntity, ButtonEntity):
     _attr_device_class = ButtonDeviceClass.RESTART
 
     def __init__(
-        self, controller: ESPSomfyController, cfg: ESPSomfyButtonDescription
+        self, *, controller: ESPSomfyController, cfg: ESPSomfyButtonDescription
     ) -> None:
         """Initialize the reboot entity."""
+        # Sécurité : On force l'init avec les arguments nommés requis par entity.py
+        super().__init__(data=None, controller=controller)
         self._controller = controller
         self._attr_device_class = cfg.device_class
-        self._attr_name = cfg.name
+        
+        # Liaison avec la description (gère le name via translation_key et has_entity_name)
+        self.entity_description = cfg
+        
         self._attr_unique_id = f"{cfg.key}_{controller.unique_id}"
         self._attr_entity_category = cfg.entity_category
         self._attr_icon = cfg.icon
@@ -120,8 +127,6 @@ class ESPSomfyButton(ESPSomfyEntity, ButtonEntity):
         self._action = cfg.action
         self._attr_assumed_state = True
         self._attr_supported_features = cfg.features
-
-        super().__init__(controller=controller, data=None)
 
     async def async_press(self) -> None:
         """Process the reboot."""

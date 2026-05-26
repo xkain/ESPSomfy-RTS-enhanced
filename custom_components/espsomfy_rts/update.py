@@ -27,7 +27,7 @@ async def async_setup_entry(
     controller: ESPSomfyController = hass.data[DOMAIN][config_entry.entry_id]
     data = controller.api.get_config()
     if "serverId" in data:
-        async_add_entities([ESPSomfyRTSUpdateEntity(controller)])
+        async_add_entities([ESPSomfyRTSUpdateEntity(controller=controller)])
 
 
 class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
@@ -39,13 +39,18 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         | UpdateEntityFeature.INSTALL
         | UpdateEntityFeature.PROGRESS
     )
-    _attr_title = "ESPSomfy RTS Firmware"
+    
+    # On active le système de traduction natif
+    _attr_has_entity_name = True
+    _attr_translation_key = "firmware"
 
-    def __init__(self, controller: ESPSomfyController) -> None:
+    def __init__(self, *, controller: ESPSomfyController) -> None:
         """Initialize the update entity."""
+        # Sécurité : On force l'init avec les arguments nommés requis par entity.py
+        super().__init__(data=None, controller=controller)
+        
         self._controller = controller
         self._available = True
-        self._attr_name = "Firmware Update"
         self._attr_unique_id = f"update_{controller.unique_id}"
         self._update_status = 0
         self._fw_progress = 100
@@ -58,8 +63,6 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
                 | UpdateEntityFeature.PROGRESS
                 | UpdateEntityFeature.BACKUP
             )
-
-        super().__init__(controller=controller, data=None)
 
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
@@ -134,7 +137,7 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         """URL to the full release notes of the latest version available."""
         if (version := self.latest_version) is None:
             return None
-        return f"https://github.com/rstrouse/ESPSomfy-RTS/releases/tag/{version}"
+        return f"https://github.com/xkain/ESPSomfy-RTS/releases/tag/{version}"
 
     async def async_install(
         self, version: str | None, backup: bool, **kwargs: Any
@@ -148,3 +151,6 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
             version = cast(str, self.latest_version)
             if version is not None:
                 await self.controller.update_firmware(version)
+                
+                
+                
