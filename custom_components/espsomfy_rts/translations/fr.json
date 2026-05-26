@@ -72,15 +72,15 @@
   "entity": {
     "button": {
       "reboot": {
-        "name": "Redémarrer l'appareil ESP"
+        "name": "Redémarrer"
       },
       "backup": {
-        "name": "Sauvegarder ESPSomfy RTS"
+        "name": "Sauvegarder"
       }
     },
     "update": {
       "firmware": {
-        "name": "Mise à jour du micrologiciel"
+        "name": "Micrologiciel"
       }
     },
     "sensor": {

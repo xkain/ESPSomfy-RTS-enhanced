@@ -38,17 +38,17 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         UpdateEntityFeature.SPECIFIC_VERSION
         | UpdateEntityFeature.INSTALL
         | UpdateEntityFeature.PROGRESS
+        | UpdateEntityFeature.RELEASE_NOTES
     )
-    
+
     # On active le système de traduction natif
     _attr_has_entity_name = True
     _attr_translation_key = "firmware"
 
     def __init__(self, *, controller: ESPSomfyController) -> None:
         """Initialize the update entity."""
-        # Sécurité : On force l'init avec les arguments nommés requis par entity.py
         super().__init__(data=None, controller=controller)
-        
+
         self._controller = controller
         self._available = True
         self._attr_unique_id = f"update_{controller.unique_id}"
@@ -62,6 +62,7 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
                 | UpdateEntityFeature.SPECIFIC_VERSION
                 | UpdateEntityFeature.PROGRESS
                 | UpdateEntityFeature.BACKUP
+                | UpdateEntityFeature.RELEASE_NOTES
             )
 
     def _handle_coordinator_update(self) -> None:
@@ -82,10 +83,13 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
                     | UpdateEntityFeature.SPECIFIC_VERSION
                     | UpdateEntityFeature.PROGRESS
                     | UpdateEntityFeature.BACKUP
+                    | UpdateEntityFeature.RELEASE_NOTES
                 )
             else:
                 self._attr_supported_features = (
-                    UpdateEntityFeature.SPECIFIC_VERSION | UpdateEntityFeature.PROGRESS
+                    UpdateEntityFeature.SPECIFIC_VERSION
+                    | UpdateEntityFeature.PROGRESS
+                    | UpdateEntityFeature.RELEASE_NOTES
                 )
             self.async_write_ha_state()
         elif self.controller.data["event"] == EVT_UPDPROGRESS:
@@ -108,6 +112,7 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
     @property
     def can_install(self) -> bool:
         """Indicates whether the current version supports firmware installation."""
+        return True
 
     @property
     def installed_version(self) -> str | None:
@@ -147,11 +152,10 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         if backup:
             success = await self._controller.create_backup()
         if success:
-            # We cast here, we know that the latest_version is supposed to be a string.
             version = cast(str, self.latest_version)
             if version is not None:
                 await self.controller.update_firmware(version)
-                
+
     async def async_release_notes(self) -> str | None:
         """Return the release notes from GitHub."""
         if (version := self.latest_version) is None:
@@ -159,4 +163,3 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
 
         # On appelle directement la fonction créée dans controller.py
         return await self._controller.fetch_release_notes(version)
-                
