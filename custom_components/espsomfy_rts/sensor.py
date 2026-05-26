@@ -14,7 +14,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATTS,
     UnitOfDataRate,
     UnitOfInformation,
 )
@@ -200,6 +200,7 @@ async def async_setup_entry(
                             entity_category=EntityCategory.DIAGNOSTIC,
                             has_entity_name=True,
                             icon="mdi:memory",
+                            device_class=SensorDeviceClass.DATA_SIZE,
                             unit_of_measurement=UnitOfInformation.BYTES,
                             state_class=SensorStateClass.MEASUREMENT,
                             suggested_display_precision=0,
@@ -221,6 +222,7 @@ async def async_setup_entry(
                             entity_category=EntityCategory.DIAGNOSTIC,
                             has_entity_name=True,
                             icon="mdi:memory",
+                            device_class=SensorDeviceClass.DATA_SIZE,
                             min_interval=30,
                             value_count=15,
                             unit_of_measurement=UnitOfInformation.BYTES,
@@ -259,7 +261,6 @@ class ESPSomfyDiagSensor(ESPSomfyEntity, SensorEntity):
         self, *, controller: ESPSomfyController, cfg: ESPSomfyDiagSensorDescription, data: any
     ) -> None:
         """Initialize a new diagnostic sensor."""
-        # On passe explicitement sous forme de mots-clés exigés par entity.py
         super().__init__(data=data, controller=controller)
         self._controller = controller
         self._available = True
@@ -267,9 +268,15 @@ class ESPSomfyDiagSensor(ESPSomfyEntity, SensorEntity):
 
         self._attr_entity_category = cfg.entity_category
         self._attr_unique_id = f"{cfg.key}_{controller.unique_id}"
-        self.entity_description = cfg  # Lie la clé de traduction et le has_entity_name
+        self.entity_description = cfg
         self.events = cfg.events
         self._attr_native_value = cfg.native_value
+
+        # Correction : On mappe les propriétés système indispensables
+        self._attr_native_unit_of_measurement = cfg.unit_of_measurement
+        self._attr_device_class = cfg.device_class
+        self._attr_state_class = cfg.state_class
+
         self._last_recorded = time.time()
         self._min_interval = cfg.min_interval
         self._value_count = cfg.value_count
@@ -330,7 +337,7 @@ class ESPSomfyWifiStrengthSensor(ESPSomfyDiagSensor):
                 has_entity_name=True,
                 device_class=SensorDeviceClass.SIGNAL_STRENGTH,
                 entity_category=EntityCategory.DIAGNOSTIC,
-                unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+                unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATTS,
                 state_class=SensorStateClass.MEASUREMENT,
                 icon="mdi:wifi",
                 min_interval=30,
