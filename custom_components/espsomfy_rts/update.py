@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, cast
 
 from homeassistant.components.update import (
@@ -11,12 +12,14 @@ from homeassistant.components.update import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, EVT_CONNECTED, EVT_FWSTATUS, EVT_UPDPROGRESS
 from .controller import ESPSomfyController
 from .entity import ESPSomfyEntity
 
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -34,6 +37,10 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
     """Defines an ESPSomfy RTS update entity."""
 
     _attr_device_class = UpdateDeviceClass.FIRMWARE
+    
+    # On force l'entité à rester dans le bloc "Configuration" du tableau de bord
+    _attr_entity_category = EntityCategory.CONFIG
+    
     _attr_supported_features = (
         UpdateEntityFeature.SPECIFIC_VERSION
         | UpdateEntityFeature.INSTALL
@@ -41,7 +48,6 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         | UpdateEntityFeature.RELEASE_NOTES
     )
 
-    # On active le système de traduction natif
     _attr_has_entity_name = True
     _attr_translation_key = "firmware"
 
@@ -56,14 +62,13 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         self._fw_progress = 100
         self._app_progress = 100
         self._total_progress = 100
-        if controller.check_for_update:
-            self._attr_supported_features = (
-                UpdateEntityFeature.INSTALL
-                | UpdateEntityFeature.SPECIFIC_VERSION
-                | UpdateEntityFeature.PROGRESS
-                | UpdateEntityFeature.BACKUP
-                | UpdateEntityFeature.RELEASE_NOTES
-            )
+        
+        # Sécurité au démarrage : On applique les fonctionnalités de base
+        self._attr_supported_features = (
+            UpdateEntityFeature.SPECIFIC_VERSION
+            | UpdateEntityFeature.PROGRESS
+            | UpdateEntityFeature.RELEASE_NOTES
+        )
 
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
@@ -73,11 +78,18 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         ):
             self._available = bool(self._controller.data["connected"])
             self.async_write_ha_state()
+            
         elif self._controller.data["event"] == EVT_FWSTATUS:
-            if (
-                self._controller.check_for_update
-                and self._controller.internet_available
-            ):
+            evt_data = self._controller.data
+            
+            _LOGGER.error("ESPSomfy RTS FWSTATUS Payload: %s", evt_data)
+            
+            # Extraction des deux verrous de sécurité
+            check_updates = evt_data.get("checkForUpdate", False)
+            internet_ok = evt_data.get("inetAvailable", False)
+
+            # Le bouton d'installation ne s'active QUE si l'ESP confirme les deux conditions
+            if check_updates and internet_ok:
                 self._attr_supported_features = (
                     UpdateEntityFeature.INSTALL
                     | UpdateEntityFeature.SPECIFIC_VERSION
@@ -92,6 +104,7 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
                     | UpdateEntityFeature.RELEASE_NOTES
                 )
             self.async_write_ha_state()
+            
         elif self.controller.data["event"] == EVT_UPDPROGRESS:
             d = self.controller.data
             if "part" in d:
@@ -124,8 +137,10 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
     @property
     def latest_version(self) -> str | None:
         """Latest version available for install."""
-        if self.coordinator.check_for_update is False:
+        cfg = self._controller.api.get_config()
+        if cfg.get("checkForUpdate", False) is False:
             return None
+            
         if (latest := self.coordinator.latest_version) is None:
             return None
         return str(latest)
@@ -161,5 +176,4 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         if (version := self.latest_version) is None:
             return None
 
-        # On appelle directement la fonction créée dans controller.py
         return await self._controller.fetch_release_notes(version)
