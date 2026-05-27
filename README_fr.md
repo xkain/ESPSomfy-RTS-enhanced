@@ -2,7 +2,7 @@
 
 [![GitHub Release](https://img.shields.io/github/release/xkain/ESPSomfy-RTS-HA.svg?style=for-the-badge)](https://github.com/xkain/ESPSomfy-RTS-HA/releases) [![GitHub Activity](https://img.shields.io/github/last-commit/xkain/ESPSomfy-RTS-HA?style=for-the-badge)](https://github.com/xkain/ESPSomfy-RTS-HA/commits/main) [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 <br />
-[![License](https://img.shields.io/github/license/xkain/ESPSomfy-RTS-HA.svg?style=for-the-badge)](LICENSE) [![Project Maintenance](https://img.shields.io/badge/maintainer-xkain-blue.svg?style=for-the-badge)](https://github.com/xkain) [![Github](https://img.shields.io/github/followers/xkain?style=for-the-badge)](https://github.com/xkain)
+[![License](https://img.shields.io/github/license/xkain/ESPSomfy-RTS-HA.svg?style=for-the-badge)](LICENSE) [![Project Maintenance](https://img.shields.io/badge/maintainer-xkain-blue.svg?style=for-the-badge)](https://github.com/xkain) [![GitHub stars](https://img.shields.io/github/stars/xkain/ESPSomfy-RTS-HA?style=for-the-badge&logo=github&color=blue)](https://github.com/xkain/ESPSomfy-RTS-HA/stargazers)
 
 <br />
 
