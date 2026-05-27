@@ -2,7 +2,7 @@
 
 from homeassistant.const import Platform
 
-VERSION = "v2.5.3"
+VERSION = "v2.5.4"
 DOMAIN = "espsomfy_rts"
 MANUFACTURER = "xkain"
 API_CONTROLLER = "/controller"

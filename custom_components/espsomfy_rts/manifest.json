@@ -1,7 +1,7 @@
 {
   "domain": "espsomfy_rts",
-  "name": "ESPSomfy RTS HA",
-  "codeowners": ["@xkain"],
+  "name": "ESPSomfy-RTS-HA",
+  "codeowners": ["@rstouse @xkain"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/xkain/ESPSomfy-RTS/wiki",
@@ -15,7 +15,7 @@
       "deviceType": "urn:schemas-xkain:device:Somfy:1"
     }
   ],
-  "version": "2.5.3",
+  "version": "2.5.4",
   "zeroconf": [
     {
       "type": "_espsomfy_rts._tcp.local.",
