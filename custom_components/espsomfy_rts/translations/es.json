@@ -68,5 +68,58 @@
         "description": "Proporciona las opciones de seguridad configuradas para tu dispositivo"
       }
     }
+  },
+  "entity": {
+    "button": {
+      "reboot": {
+        "name": "Reiniciar"
+      },
+      "backup": {
+        "name": "Respaldar (Backup)"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Firmware"
+      }
+    },
+    "sensor": {
+      "host_name": {
+        "name": "Nombre de host"
+      },
+      "chip_model": {
+        "name": "Modelo de chip"
+      },
+      "conn_type": {
+        "name": "Conexión"
+      },
+      "wifi_sensor": {
+        "name": "Señal Wi-Fi"
+      },
+      "wifi_ssid": {
+        "name": "SSID Wi-Fi"
+      },
+      "wifi_channel": {
+        "name": "Canal Wi-Fi"
+      },
+      "eth_speed": {
+        "name": "Velocidad de conexión"
+      },
+      "eth_full_duplex": {
+        "name": "Full Duplex"
+      },
+      "free_memory": {
+        "name": "Memoria libre"
+      },
+      "max_memory": {
+        "name": "Memoria máxima"
+      },
+      "min_memory": {
+        "name": "Memoria mínima"
+      },
+      "ip_addresss": {
+        "name": "Dirección IP"
+      }
+    }
   }
 }

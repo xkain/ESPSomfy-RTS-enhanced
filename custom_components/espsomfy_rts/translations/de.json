@@ -68,5 +68,58 @@
         "description": "Geben Sie Ihre Daten ein."
       }
     }
+  },
+  "entity": {
+    "button": {
+      "reboot": {
+        "name": "Neustarten"
+      },
+      "backup": {
+        "name": "Sichern (Backup)"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Firmware"
+      }
+    },
+    "sensor": {
+      "host_name": {
+        "name": "Hostname"
+      },
+      "chip_model": {
+        "name": "Chiptyp"
+      },
+      "conn_type": {
+        "name": "Verbindung"
+      },
+      "wifi_sensor": {
+        "name": "WLAN-Signalstärke"
+      },
+      "wifi_ssid": {
+        "name": "WLAN-SSID"
+      },
+      "wifi_channel": {
+        "name": "WLAN-Kanal"
+      },
+      "eth_speed": {
+        "name": "Verbindungsgeschwindigkeit"
+      },
+      "eth_full_duplex": {
+        "name": "Full Duplex"
+      },
+      "free_memory": {
+        "name": "Freier Speicher"
+      },
+      "max_memory": {
+        "name": "Maximaler Speicher"
+      },
+      "min_memory": {
+        "name": "Minimaler Speicher"
+      },
+      "ip_addresss": {
+        "name": "IP-Adresse"
+      }
+    }
   }
 }
