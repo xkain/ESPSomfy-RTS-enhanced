@@ -204,7 +204,7 @@ class SocketListener(threading.Thread):
 
 
 class ESPSomfyController(DataUpdateCoordinator):
-    """Data coordinator/controller for receiving from ESPSomfy_RTS."""
+    """Data coordinator/controller for receiving from espsomfy_RTS."""
 
     def __init__(self, config_entry_id, hass: HomeAssistant, api: ESPSomfyAPI) -> None:
         """Initialize data coordinator."""

@@ -2,7 +2,7 @@
   "config": {
     "abort": {
       "no_devices_found": "No devices found on the network",
-      "single_instance_allowed": "Already configured. Only a single configuration possible."
+      "single_instance_allowed": "Already configured. Only a single configuration is possible."
     },
     "error": {
       "cannot_connect": "Failed to connect",
@@ -10,8 +10,8 @@
       "invalid_host": "Invalid hostname or IP address",
       "unknown": "Unexpected error",
       "invalid_password": "Invalid username or password",
-      "invalid_pin": "Invalid Pin",
-      "login_error": "Invalid login"
+      "invalid_pin": "Invalid PIN code",
+      "login_error": "Invalid login credentials"
     },
     "step": {
       "confirm": {
@@ -19,19 +19,19 @@
           "host": "Host address for the ESPSomfy RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN code"
         },
         "title": "Configure ESPSomfy RTS",
-        "description": "Provide the configured security options for your device"
+        "description": "Provide the security options configured for your device"
       },
       "user": {
         "data": {
           "host": "Host address for the ESPSomfy RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN code"
         },
-        "description": "Provide the configured security options for your device",
+        "description": "Provide the security options configured for your device",
         "title": "Configure ESPSomfy RTS"
       },
       "zeroconf_confirm": {
@@ -39,9 +39,9 @@
           "host": "Host address for the ESPSomfy RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN code"
         },
-        "description": "Do you want to add {model} with server id {server_id} to Home Assistant?",
+        "description": "Do you want to add {model} with server ID {server_id} to Home Assistant?",
         "title": "ESPSomfy RTS Discovered"
       }
     }
@@ -53,8 +53,8 @@
       "invalid_host": "Invalid hostname or IP address",
       "unknown": "Unexpected error",
       "invalid_password": "Invalid username or password",
-      "invalid_pin": "Invalid Pin",
-      "login_error": "Invalid login"
+      "invalid_pin": "Invalid PIN code",
+      "login_error": "Invalid login credentials"
     },
     "step": {
       "init": {
@@ -62,10 +62,10 @@
           "host": "Host address for the ESPSomfy RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN code"
         },
         "title": "Configure ESPSomfy RTS",
-        "description": "Provide the configured security options for your device"
+        "description": "Settings for the security options configured for your device"
       }
     }
   },
@@ -82,44 +82,3 @@
       "firmware": {
         "name": "Firmware"
       }
-    },
-    "sensor": {
-      "host_name": {
-        "name": "Hostname"
-      },
-      "chip_model": {
-        "name": "Chip model"
-      },
-      "conn_type": {
-        "name": "Connection"
-      },
-      "wifi_sensor": {
-        "name": "Wi-Fi signal strength"
-      },
-      "wifi_ssid": {
-        "name": "Wi-Fi SSID"
-      },
-      "wifi_channel": {
-        "name": "Wi-Fi channel"
-      },
-      "eth_speed": {
-        "name": "Connection speed"
-      },
-      "eth_full_duplex": {
-        "name": "Full Duplex"
-      },
-      "free_memory": {
-        "name": "Free memory"
-      },
-      "max_memory": {
-        "name": "Max memory"
-      },
-      "min_memory": {
-        "name": "Min memory"
-      },
-      "ip_addresss": {
-        "name": "IP address"
-      }
-    }
-  }
-}

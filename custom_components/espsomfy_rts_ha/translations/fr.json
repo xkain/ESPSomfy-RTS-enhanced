@@ -1,0 +1,247 @@
+{
+  "config": {
+    "abort": {
+      "no_devices_found": "Aucun appareil trouvé sur le réseau",
+      "single_instance_allowed": "Déjà configuré. Seule une configuration unique est possible."
+    },
+    "error": {
+      "cannot_connect": "Échec de la connexion",
+      "discovery_error": "Appareil non trouvé",
+      "invalid_host": "Nom d'hôte ou adresse IP invalide",
+      "unknown": "Erreur inattendue",
+      "invalid_password": "Nom d'utilisateur ou mot de passe invalide",
+      "invalid_pin": "Code PIN invalide",
+      "login_error": "Identifiant invalide"
+    },
+    "step": {
+      "confirm": {
+        "data": {
+          "host": "Adresse hôte pour le dispositif ESPSomfy-RTS",
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "pin": "Code PIN"
+        },
+        "title": "Configurer ESPSomfy-RTS",
+        "description": "Fournir les options de sécurité configurées pour votre dispositif"
+      },
+      "user": {
+        "data": {
+          "host": "Adresse hôte pour le dispositif ESPSomfy-RTS",
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "pin": "Code PIN"
+        },
+        "description": "Fournir les options de sécurité configurées pour votre dispositif",
+        "title": "Configurer ESPSomfy-RTS"
+      },
+      "zeroconf_confirm": {
+        "data": {
+          "host": "Adresse hôte pour le dispositif ESPSomfy-RTS",
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "pin": "Code PIN"
+        },
+        "description": "Voulez-vous ajouter {model} avec l'identifiant du serveur {server_id} à Home Assistant ?",
+        "title": "ESPSomfy-RTS Découvert"
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "cannot_connect": "Échec de la connexion",
+      "discovery_error": "Appareil non trouvé",
+      "invalid_host": "Nom d'hôte ou adresse IP invalide",
+      "unknown": "Erreur inattendue",
+      "invalid_password": "Nom d'utilisateur ou mot de passe invalide",
+      "invalid_pin": "Code PIN invalide",
+      "login_error": "Identifiant invalide"
+    },
+    "step": {
+      "init": {
+        "data": {
+          "host": "Adresse hôte pour le dispositif ESPSomfy-RTS",
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "pin": "Code PIN"
+        },
+        "title": "Configurer ESPSomfy-RTS",
+        "description": "Paramétrage des options de sécurité configurées pour votre dispositif"
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "reboot": {
+        "name": "Redémarrer"
+      },
+      "backup": {
+        "name": "Sauvegarder"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Micrologiciel"
+      }
+    },
+    "sensor": {
+      "host_name": {
+        "name": "Nom d'hôte"
+      },
+      "chip_model": {
+        "name": "Type de puce"
+      },
+      "conn_type": {
+        "name": "Connexion"
+      },
+      "wifi_sensor": {
+        "name": "Puissance Wi-Fi"
+      },
+      "wifi_ssid": {
+        "name": "SSID Wi-Fi"
+      },
+      "wifi_channel": {
+        "name": "Canal Wi-Fi"
+      },
+      "eth_speed": {
+        "name": "Vitesse de connexion"
+      },
+      "eth_full_duplex": {
+        "name": "Full Duplex"
+      },
+      "free_memory": {
+        "name": "Mémoire libre"
+      },
+      "max_memory": {
+        "name": "Mémoire maximale"
+      },
+      "min_memory": {
+        "name": "Mémoire minimale"
+      },
+      "ip_addresss": {
+        "name": "Adresse IP"
+      }
+    }
+  },
+  "services": {
+    "open_shade": {
+      "name": "Ouvrir l'équipement",
+      "description": "Ouvre l'équipement à 100%"
+    },
+    "close_shade": {
+      "name": "Fermer l'équipement",
+      "description": "Ferme l'équipement à 100%"
+    },
+    "stop_shade": {
+      "name": "Arrêter l'équipement",
+      "description": "Arrête l'équipement à sa position actuelle"
+    },
+    "set_shade_position": {
+      "name": "Définir la position",
+      "description": "Règle la position d'ouverture en pourcentage",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "La position cible du volet"
+        }
+      }
+    },
+    "tilt_open": {
+      "name": "Ouvrir l'inclinaison",
+      "description": "Incline les lames en position ouverte"
+    },
+    "tilt_close": {
+      "name": "Fermer l'inclinaison",
+      "description": "Incline les lames en position fermée"
+    },
+    "set_tilt_position": {
+      "name": "Définir l'inclinaison",
+      "description": "Règle l'inclinaison des lames en pourcentage",
+      "fields": {
+        "tilt_position": {
+          "name": "Position d'inclinaison",
+          "description": "L'inclinaison cible des lames"
+        }
+      }
+    },
+    "set_current_position": {
+      "name": "Forcer la position actuelle",
+      "description": "Définit la position actuelle dans HA sans actionner le moteur",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "La valeur de la position à enregistrer"
+        }
+      }
+    },
+    "set_current_tilt_position": {
+      "name": "Forcer l'inclinaison actuelle",
+      "description": "Définit l'inclinaison actuelle dans HA sans actionner le moteur",
+      "fields": {
+        "tilt_position": {
+          "name": "Position d'inclinaison",
+          "description": "La valeur de l'inclinaison à enregistrer"
+        }
+      }
+    },
+    "set_sunny": {
+      "name": "Définir l'état d'ensoleillement",
+      "description": "Envoie l'ordre au moteur indiquant s'il y a du soleil ou non",
+      "fields": {
+        "sunny": {
+          "name": "Ensoleillé",
+          "description": "Cocher s'il y a du soleil"
+        }
+      }
+    },
+    "set_windy": {
+      "name": "Définir l'état du vent",
+      "description": "Envoie l'ordre au moteur indiquant s'il y a du vent ou non",
+      "fields": {
+        "windy": {
+          "name": "Venteux",
+          "description": "Cocher s'il y a du vent"
+        }
+      }
+    },
+    "send_command": {
+      "name": "Envoyer une commande RTS",
+      "description": "Envoie n'importe quelle commande brute du protocole RTS",
+      "fields": {
+        "command": {
+          "name": "Commande",
+          "description": "La commande RTS à envoyer"
+        },
+        "repeat": {
+          "name": "Répétition",
+          "description": "Nombre de fois que la commande sera répétée"
+        }
+      }
+    },
+    "send_step_command": {
+      "name": "Envoyer une commande Pas-à-Pas",
+      "description": "Envoie une commande de mouvement par palier",
+      "fields": {
+        "direction": {
+          "name": "Direction",
+          "description": "La direction du pas (Haut / Bas)"
+        },
+        "step_size": {
+          "name": "Taille du pas",
+          "description": "La taille du palier (127 étant le maximum)"
+        },
+        "repeat": {
+          "name": "Répétition",
+          "description": "Nombre de fois que la commande sera répétée"
+        }
+      }
+    },
+    "reboot": {
+      "name": "Redémarrer l'appareil",
+      "description": "Provoque le redémarrage du boîtier ESPSomfy"
+    },
+    "backup": {
+      "name": "Sauvegarder l'appareil",
+      "description": "Lance une sauvegarde de la configuration du boîtier ESPSomfy"
+    }
+  }
+}

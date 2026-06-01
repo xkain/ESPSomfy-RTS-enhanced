@@ -54,7 +54,7 @@ The easiest way to get started is to add this repository as a [Custom Repository
 5. Download and install the integration.
 
 ### Method 2: Manual Installation
-Simply copy the contents of the `custom_components/espsomfy_rts/` folder and paste it into the `config/custom_components/espsomfy_rts/` directory of your Home Assistant instance.
+Simply copy the contents of the `custom_components/espsomfy_rts_ha/` folder and paste it into the `config/custom_components/espsomfy_rts_ha/` directory of your Home Assistant instance.
 
 ### Initial Setup
 Once installed and Home Assistant is restarted, the integration will **automatically discover** your radio modules on the local network. Simply navigate to **Settings** → **Devices & Services**: your ESPSomfy-RTS device will show up, ready to be configured.

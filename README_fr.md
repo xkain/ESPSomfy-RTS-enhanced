@@ -51,7 +51,7 @@ L'installation la plus simple se fait en ajoutant ce dépôt comme [Dépôt Pers
 5. Téléchargez et installez l'intégration.
 
 ### Méthode 2 : Installation Manuelle
-Copiez simplement le contenu du dossier `custom_components/espsomfy_rts/` et collez-le dans le répertoire `config/custom_components/espsomfy_rts/` de votre instance Home Assistant.
+Copiez simplement le contenu du dossier `custom_components/espsomfy_rts_ha/` et collez-le dans le répertoire `config/custom_components/espsomfy_rts_ha/` de votre instance Home Assistant.
 
 ### Configuration initiale
 Une fois installée et Home Assistant redémarré, l'intégration **détectera automatiquement** vos modules radio présents sur le réseau local. Rendez-vous simplement dans **Paramètres** → **Appareils et services** : votre équipement ESPSomfy-RTS y apparaîtra prêt à être configuré.

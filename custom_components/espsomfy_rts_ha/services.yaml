@@ -3,7 +3,7 @@ open_shade:
   description: Opens the shade to 100% open
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
 
 close_shade:
@@ -11,7 +11,7 @@ close_shade:
   description: Closes the shade to 100% closed
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
 
 stop_shade:
@@ -19,7 +19,7 @@ stop_shade:
   description: Stops the shade at the current position
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
 
 set_shade_position:
@@ -27,7 +27,7 @@ set_shade_position:
   description: Sets the position to percentage of open
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     position:
@@ -45,7 +45,7 @@ tilt_open:
   description: Tilts the slats open
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
 
 tilt_close:
@@ -53,7 +53,7 @@ tilt_close:
   description: Tilts the slats closed
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
 
 set_tilt_position:
@@ -61,7 +61,7 @@ set_tilt_position:
   description: Sets the tilt position to percentage of open
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     tilt_position:
@@ -79,7 +79,7 @@ set_current_position:
   description: Sets the current position without moving the motor
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     position:
@@ -97,7 +97,7 @@ set_current_tilt_position:
   description: Sets the current tilt position without moving the motor
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     tilt_position:
@@ -115,7 +115,7 @@ set_sunny:
   description: Sends the sensor commands to the motor indicating whether it is sunny or not
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     sunny:
@@ -130,7 +130,7 @@ set_windy:
   description: Sends the sensor commands to the motor indicating whether it is windy or not
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     windy:
@@ -145,7 +145,7 @@ send_command:
   description: Send any command from RTS protocol
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     command:
@@ -185,7 +185,7 @@ send_step_command:
   description: Send a step command with a step size
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: cover
   fields:
     direction:
@@ -219,7 +219,7 @@ reboot:
   description: Reboot the ESPSomfy Device
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: button
       supported_features:
         - fan.FanEntityFeature.SET_SPEED
@@ -229,7 +229,7 @@ backup:
   description: Backup the ESPSomfy Device
   target:
     entity:
-      integration: espsomfy_rts
+      integration: espsomfy_rts_ha
       domain: button
       supported_features:
         - fan.FanEntityFeature.OSCILLATE

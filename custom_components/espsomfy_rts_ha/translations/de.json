@@ -1,0 +1,247 @@
+{
+  "config": {
+    "abort": {
+      "no_devices_found": "Keine Geräte im Netzwerk gefunden",
+      "single_instance_allowed": "Bereits konfiguriert. Es ist nur eine einzige Konfiguration möglich."
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen",
+      "discovery_error": "Gerät nicht gefunden",
+      "invalid_host": "Ungültiger Hostname oder IP-Adresse",
+      "unknown": "Unerwarteter Fehler",
+      "invalid_password": "Ungültiger Benutzername oder Passwort",
+      "invalid_pin": "Ungültiger PIN-Code",
+      "login_error": "Ungültige Anmeldedaten"
+    },
+    "step": {
+      "confirm": {
+        "data": {
+          "host": "Host-Adresse für das ESPSomfy RTS-Gerät",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "pin": "PIN-Code"
+        },
+        "title": "ESPSomfy RTS konfigurieren",
+        "description": "Bitte gib die für dein Gerät konfigurierten Sicherheitsoptionen ein"
+      },
+      "user": {
+        "data": {
+          "host": "Host-Adresse für das ESPSomfy RTS-Gerät",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "pin": "PIN-Code"
+        },
+        "description": "Bitte gib die für dein Gerät konfigurierten Sicherheitsoptionen ein",
+        "title": "ESPSomfy RTS konfigurieren"
+      },
+      "zeroconf_confirm": {
+        "data": {
+          "host": "Host-Adresse für das ESPSomfy RTS-Gerät",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "pin": "PIN-Code"
+        },
+        "description": "Möchtest du {model} mit der Server-ID {server_id} zu Home Assistant hinzufügen?",
+        "title": "ESPSomfy RTS entdeckt"
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen",
+      "discovery_error": "Gerät nicht gefunden",
+      "invalid_host": "Ungültiger Hostname oder IP-Adresse",
+      "unknown": "Unerwarteter Fehler",
+      "invalid_password": "Ungültiger Benutzername oder Passwort",
+      "invalid_pin": "Ungültiger PIN-Code",
+      "login_error": "Ungültige Anmeldedaten"
+    },
+    "step": {
+      "init": {
+        "data": {
+          "host": "Host-Adresse für das ESPSomfy RTS-Gerät",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "pin": "PIN-Code"
+        },
+        "title": "ESPSomfy RTS konfigurieren",
+        "description": "Einstellungen der für dein Gerät konfigurierten Sicherheitsoptionen"
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "reboot": {
+        "name": "Neustarten"
+      },
+      "backup": {
+        "name": "Sichern"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Firmware"
+      }
+    },
+    "sensor": {
+      "host_name": {
+        "name": "Hostname"
+      },
+      "chip_model": {
+        "name": "Chipsatz-Modell"
+      },
+      "conn_type": {
+        "name": "Verbindungstyp"
+      },
+      "wifi_sensor": {
+        "name": "WLAN-Signalstärke"
+      },
+      "wifi_ssid": {
+        "name": "WLAN-SSID"
+      },
+      "wifi_channel": {
+        "name": "WLAN-Kanal"
+      },
+      "eth_speed": {
+        "name": "Verbindungsgeschwindigkeit"
+      },
+      "eth_full_duplex": {
+        "name": "Full Duplex"
+      },
+      "free_memory": {
+        "name": "Freier Speicher"
+      },
+      "max_memory": {
+        "name": "Maximaler Speicher"
+      },
+      "min_memory": {
+        "name": "Minimaler Speicher"
+      },
+      "ip_addresss": {
+        "name": "IP-Adresse"
+      }
+    }
+  },
+  "services": {
+    "open_shade": {
+      "name": "Rollladen öffnen",
+      "description": "Öffnet den Rollladen zu 100%"
+    },
+    "close_shade": {
+      "name": "Rollladen schließen",
+      "description": "Schließt den Rollladen zu 100%"
+    },
+    "stop_shade": {
+      "name": "Rollladen stoppen",
+      "description": "Stoppt den Rollladen an der aktuellen Position"
+    },
+    "set_shade_position": {
+      "name": "Position festlegen",
+      "description": "Stellt die Öffnungsposition in Prozent ein",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "Die Zielposition des Rollladens"
+        }
+      }
+    },
+    "tilt_open": {
+      "name": "Lamellen öffnen",
+      "description": "Neigt die Lamellen in die geöffnete Position"
+    },
+    "tilt_close": {
+      "name": "Lamellen schließen",
+      "description": "Neigt die Lamellen in die geschlossene Position"
+    },
+    "set_tilt_position": {
+      "name": "Lamellenneigung festlegen",
+      "description": "Stellt die Neigung der Lamellen in Prozent ein",
+      "fields": {
+        "tilt_position": {
+          "name": "Neigungsposition",
+          "description": "Die Zielneigung der Lamellen"
+        }
+      }
+    },
+    "set_current_position": {
+      "name": "Aktuelle Position erzwingen",
+      "description": "Setzt die aktuelle Position in HA, ohne den Motor zu bewegen",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "Der zu speichernde Positionswert"
+        }
+      }
+    },
+    "set_current_tilt_position": {
+      "name": "Aktuelle Neigung erzwingen",
+      "description": "Setzt die aktuelle Neigung in HA, ohne den Motor zu bewegen",
+      "fields": {
+        "tilt_position": {
+          "name": "Neigungsposition",
+          "description": "Der zu speichernde Neigungswert"
+        }
+      }
+    },
+    "set_sunny": {
+      "name": "Sonnigen Zustand festlegen",
+      "description": "Sendet den Befehl an den Motor, ob die Sonne scheint oder nicht",
+      "fields": {
+        "sunny": {
+          "name": "Sonnig",
+          "description": "Aktivieren, wenn die Sonne scheint"
+        }
+      }
+    },
+    "set_windy": {
+      "name": "Windigen Zustand festlegen",
+      "description": "Sendet den Befehl an den Motor, ob es windig ist oder nicht",
+      "fields": {
+        "windy": {
+          "name": "Windig",
+          "description": "Aktivieren, wenn es windig ist"
+        }
+      }
+    },
+    "send_command": {
+      "name": "RTS-Befehl senden",
+      "description": "Sendet einen beliebigen Rohbefehl des RTS-Protokolls",
+      "fields": {
+        "command": {
+          "name": "Befehl",
+          "description": "Der zu sendende RTS-Befehl"
+        },
+        "repeat": {
+          "name": "Wiederholung",
+          "description": "Wie oft der Befehl wiederholt werden soll"
+        }
+      }
+    },
+    "send_step_command": {
+      "name": "Schritt-Befehl senden",
+      "description": "Sendet einen Bewegungsbefehl in Stufen",
+      "fields": {
+        "direction": {
+          "name": "Richtung",
+          "description": "Die Richtung des Schritts (Auf / Ab)"
+        },
+        "step_size": {
+          "name": "Schrittweite",
+          "description": "Die Größe der Stufe (Maximum ist 127)"
+        },
+        "repeat": {
+          "name": "Wiederholung",
+          "description": "Wie oft der Befehl wiederholt werden soll"
+        }
+      }
+    },
+    "reboot": {
+      "name": "Gerät neustarten",
+      "description": "Startet die ESPSomfy-Box neu"
+    },
+    "backup": {
+      "name": "Gerät sichern",
+      "description": "Startet eine Sicherung der Konfiguration der ESPSomfy-Box"
+    }
+  }
+}
