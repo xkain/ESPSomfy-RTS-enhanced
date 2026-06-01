@@ -82,3 +82,166 @@
       "firmware": {
         "name": "Firmware"
       }
+    },
+    "sensor": {
+      "host_name": {
+        "name": "Hostname"
+      },
+      "chip_model": {
+        "name": "Chip model"
+      },
+      "conn_type": {
+        "name": "Connection"
+      },
+      "wifi_sensor": {
+        "name": "Wi-Fi signal strength"
+      },
+      "wifi_ssid": {
+        "name": "Wi-Fi SSID"
+      },
+      "wifi_channel": {
+        "name": "Wi-Fi channel"
+      },
+      "eth_speed": {
+        "name": "Connection speed"
+      },
+      "eth_full_duplex": {
+        "name": "Full Duplex"
+      },
+      "free_memory": {
+        "name": "Free memory"
+      },
+      "max_memory": {
+        "name": "Max memory"
+      },
+      "min_memory": {
+        "name": "Min memory"
+      },
+      "ip_addresss": {
+        "name": "IP address"
+      }
+    }
+  },
+  "services": {
+    "open_shade": {
+      "name": "Open shade",
+      "description": "Opens the shade to 100% open"
+    },
+    "close_shade": {
+      "name": "Close shade",
+      "description": "Closes the shade to 100% closed"
+    },
+    "stop_shade": {
+      "name": "Stop shade",
+      "description": "Stops the shade at the current position"
+    },
+    "set_shade_position": {
+      "name": "Set position",
+      "description": "Sets the opening position to percentage",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "The target position of the shade"
+        }
+      }
+    },
+    "tilt_open": {
+      "name": "Tilt open",
+      "description": "Tilts the slats open"
+    },
+    "tilt_close": {
+      "name": "Tilt close",
+      "description": "Tilts the slats closed"
+    },
+    "set_tilt_position": {
+      "name": "Set tilt position",
+      "description": "Sets the tilt position of the slats to percentage",
+      "fields": {
+        "tilt_position": {
+          "name": "Tilt position",
+          "description": "The target tilt position of the slats"
+        }
+      }
+    },
+    "set_current_position": {
+      "name": "Force current position",
+      "description": "Sets the current position in HA without moving the motor",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "The position value to be saved"
+        }
+      }
+    },
+    "set_current_tilt_position": {
+      "name": "Force current tilt position",
+      "description": "Sets the current tilt position in HA without moving the motor",
+      "fields": {
+        "tilt_position": {
+          "name": "Tilt position",
+          "description": "The tilt position value to be saved"
+        }
+      }
+    },
+    "set_sunny": {
+      "name": "Set sunny state",
+      "description": "Sends the command to the motor indicating whether it is sunny or not",
+      "fields": {
+        "sunny": {
+          "name": "Sunny",
+          "description": "Check if it is sunny"
+        }
+      }
+    },
+    "set_windy": {
+      "name": "Set windy state",
+      "description": "Sends the command to the motor indicating whether it is windy or not",
+      "fields": {
+        "windy": {
+          "name": "Windy",
+          "description": "Check if it is windy"
+        }
+      }
+    },
+    "send_command": {
+      "name": "Send RTS command",
+      "description": "Sends any raw command from the RTS protocol",
+      "fields": {
+        "command": {
+          "name": "Command",
+          "description": "The RTS command to send"
+        },
+        "repeat": {
+          "name": "Repeat",
+          "description": "Number of times the command will be repeated"
+        }
+      }
+    },
+    "send_step_command": {
+      "name": "Send step command",
+      "description": "Sends a movement command in steps",
+      "fields": {
+        "direction": {
+          "name": "Direction",
+          "description": "The direction of the step (Up / Down)"
+        },
+        "step_size": {
+          "name": "Step size",
+          "description": "The size of the step (maximum is 127)"
+        },
+        "repeat": {
+          "name": "Repeat",
+          "description": "Number of times the command will be repeated"
+        }
+      }
+    },
+    "reboot": {
+      "name": "Reboot device",
+      "description": "Triggers a reboot of the ESPSomfy device"
+    },
+    "backup": {
+      "name": "Backup device",
+      "description": "Triggers a backup of the ESPSomfy device configuration"
+    }
+  }
+}
