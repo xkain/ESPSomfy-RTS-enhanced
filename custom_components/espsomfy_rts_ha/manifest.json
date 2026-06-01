@@ -9,16 +9,16 @@
   "integration_type": "hub",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/xkain/ESPSomfy-RTS-HA/issues",
-  "requirements": ["websocket-client==1.8.0", "aiofiles"],
+  "requirements": ["websocket-client>=1.8.0", "aiofiles"],
   "ssdp": [
     {
-      "deviceType": "urn:schemas-xkain:device:Somfy:1"
+      "deviceType": "urn:schemas-xkain-org:device:Somfy:1"
     }
   ],
-  "version": "2.4.8",
+  "version": "2.4.9",
   "zeroconf": [
     {
-      "type": "_espsomfy_rts_ha._tcp.local.",
+      "type": "_espsomfy_rts._tcp.local.",
       "properties": { "model": "espsomfy*" }
     }
   ]
