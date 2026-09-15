@@ -38,7 +38,7 @@ A custom Home Assistant integration (Fork) to precisely control and monitor your
 ## Requirements
 
 This integration requires hardware running on an **ESP32** and a **CC1101** transceiver.
-To assemble and configure this hardware, please refer to the repository wiki: [components](https://github.com/xkain/ESPSomfy-RTS). The radio protocol must be configured for your devices before using this integration.
+To assemble and configure this hardware, please refer to the **ESPSomfy-RTS** firmware [wiki](https://github.com/xkain/ESPSomfy-RTS/wiki). The radio protocol must be configured for your devices before using this integration.
 
 ---
 
@@ -111,8 +111,4 @@ The integration emits events on the Home Assistant event bus for every intercept
 * `Prog`: Program button press.
 * `My+Up` / `My+Down` / `Up+Down` / `My+Up+Down`: Simultaneous physical key combinations.
 
----
 
-## Automations and Services
-
-Many specific services are available to enrich your automations. Check out the usage examples directly in the [Services section of the Wiki](https://github.com/xkain/ESPSomfy-RTS-enhanced/wiki/Services).

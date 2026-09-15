@@ -35,7 +35,7 @@ Une intégration Home Assistant personnalisée (Fork) permettant de contrôler e
 ## Prérequis
 
 Cette intégration nécessite une passerelle matérielle basée sur un **ESP32** et un **CC1101**. 
-Pour assembler et configurer ce matériel, veuillez vous référer au wiki du dépot : [components](https://github.com/xkain/ESPSomfy-RTS). Le protocole radio doit être configuré pour vos équipements avant d'utiliser cette intégration.
+Pour assembler et configurer ce matériel, veuillez vous référer au [wiki](https://github.com/xkain/ESPSomfy-RTS/wiki) du firmware **ESPSomfy-RTS**. Le protocole radio doit être configuré pour vos équipements avant d'utiliser cette intégration.
 
 ---
 
@@ -107,8 +107,5 @@ L'intégration émet des événements sur le bus de Home Assistant pour chaque c
 * `Prog` : Appui sur le bouton de programmation.
 * `My+Up` / `My+Down` / `Up+Down` / `My+Up+Down` : Combinaisons de touches physiques simultanées.
 
----
 
-##  Automatisations et Services
 
-De nombreux services spécifiques sont mis à votre disposition pour enrichir vos automatisations. Consultez les exemples d'utilisation directement dans la section [Services du Wiki](https://github.com/xkain/ESPSomfy-RTS-enhanced/wiki/Services).
