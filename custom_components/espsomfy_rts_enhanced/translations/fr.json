@@ -262,7 +262,7 @@
   },
   "exceptions": {
     "release_notes_firmware_banner": {
-      "message": "> **Remarque :** ceci met à jour le micrologiciel de votre carte ESP32 — un projet distinct de l'intégration Home Assistant *ESPSomfy-RTS-enhanced* installée via HACS. Leurs numéros de version sont indépendants.\n\n---\n\n"
+      "message": "> **Remarque :** ceci met à jour le micrologiciel de votre carte ESP32 — un projet distinct de l'intégration Home Assistant *ESPSomfy-RTS-enhanced* installée via HACS. Leurs numéros de version sont indépendants."
     },
     "release_notes_no_description": {
       "message": "Aucune description disponible."

@@ -262,7 +262,7 @@
   },
   "exceptions": {
     "release_notes_firmware_banner": {
-      "message": "> **Nota:** esto actualiza el firmware de tu placa controladora ESP32 — un proyecto independiente de la integración de Home Assistant *ESPSomfy-RTS-enhanced* instalada mediante HACS. Sus números de versión son independientes.\n\n---\n\n"
+      "message": "> **Nota:** esto actualiza el firmware de tu placa controladora ESP32 — un proyecto independiente de la integración de Home Assistant *ESPSomfy-RTS-enhanced* instalada mediante HACS. Sus números de versión son independientes."
     },
     "release_notes_no_description": {
       "message": "No hay descripción disponible."

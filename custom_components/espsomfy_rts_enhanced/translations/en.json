@@ -262,7 +262,7 @@
   },
   "exceptions": {
     "release_notes_firmware_banner": {
-      "message": "> **Note:** This updates the firmware on your ESP32 controller board — a separate project from the *ESPSomfy-RTS-enhanced* Home Assistant integration you installed via HACS. Their version numbers are independent.\n\n---\n\n"
+      "message": "> **Note:** This updates the firmware on your ESP32 controller board — a separate project from the *ESPSomfy-RTS-enhanced* Home Assistant integration you installed via HACS. Their version numbers are independent."
     },
     "release_notes_no_description": {
       "message": "No description available."

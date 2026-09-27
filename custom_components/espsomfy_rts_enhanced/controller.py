@@ -918,7 +918,8 @@ class ESPSomfyAPI:
             translations = await async_get_translations(
                 self.hass, "en", "exceptions", integrations=[DOMAIN]
             )
-        banner = translations.get(f"{prefix}firmware_banner.message", "")
+        banner_text = translations.get(f"{prefix}firmware_banner.message", "")
+        banner = f"{banner_text}\n\n---\n\n" if banner_text else ""
         no_description = translations.get(f"{prefix}no_description.message", "No description available.")
         fetch_error_status = translations.get(
             f"{prefix}fetch_error_status.message", "Unable to load release notes (GitHub code: {status})"

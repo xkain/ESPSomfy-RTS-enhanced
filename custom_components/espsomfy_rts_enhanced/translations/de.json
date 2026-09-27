@@ -262,7 +262,7 @@
   },
   "exceptions": {
     "release_notes_firmware_banner": {
-      "message": "> **Hinweis:** Dies aktualisiert die Firmware Ihres ESP32-Controllers — ein eigenständiges Projekt, getrennt von der über HACS installierten Home Assistant-Integration *ESPSomfy-RTS-enhanced*. Die Versionsnummern sind voneinander unabhängig.\n\n---\n\n"
+      "message": "> **Hinweis:** Dies aktualisiert die Firmware Ihres ESP32-Controllers — ein eigenständiges Projekt, getrennt von der über HACS installierten Home Assistant-Integration *ESPSomfy-RTS-enhanced*. Die Versionsnummern sind voneinander unabhängig."
     },
     "release_notes_no_description": {
       "message": "Keine Beschreibung verfügbar."
