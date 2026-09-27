@@ -26,6 +26,7 @@ from homeassistant.helpers import (
     entity_registry as er,
 )
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
@@ -906,16 +907,36 @@ class ESPSomfyAPI:
             "User-Agent": "HomeAssistant-ESPSomfyRTS-Integration"
         }
 
+        # Textes tirés de translations/<lang>.json (catégorie "release_notes"),
+        # avec repli sur l'anglais si la clé est absente pour la langue active.
+        prefix = f"component.{DOMAIN}.release_notes."
+        translations = await async_get_translations(
+            self.hass, self.hass.config.language, "release_notes", integrations=[DOMAIN]
+        )
+        if not any(key.startswith(prefix) for key in translations):
+            translations = await async_get_translations(
+                self.hass, "en", "release_notes", integrations=[DOMAIN]
+            )
+        banner = translations.get(f"{prefix}firmware_banner", "")
+        no_description = translations.get(f"{prefix}no_description", "No description available.")
+        fetch_error_status = translations.get(
+            f"{prefix}fetch_error_status", "Unable to load release notes (GitHub code: {status})"
+        )
+        fetch_error_exception = translations.get(
+            f"{prefix}fetch_error_exception", "Error while fetching release notes."
+        )
+
         try:
             async with self._session.get(url, headers=headers, timeout=10) as response:
                 if response.status == 200:
                     data = await response.json()
                     # Extrait le texte au format Markdown
-                    return data.get("body", "Aucune description disponible.")
-                return f"Impossible de charger les notes (Code GitHub : {response.status})"
+                    body = data.get("body", no_description)
+                    return banner + body
+                return fetch_error_status.format(status=response.status)
         except Exception as e:
             _LOGGER.error("Erreur notes de version : %s", e)
-            return "Erreur lors de la récupération des notes de version."
+            return fetch_error_exception
 
 
 class InvalidHost(HomeAssistantError):
