@@ -907,23 +907,24 @@ class ESPSomfyAPI:
             "User-Agent": "HomeAssistant-ESPSomfyRTS-Integration"
         }
 
-        # Textes tirés de translations/<lang>.json (catégorie "release_notes"),
-        # avec repli sur l'anglais si la clé est absente pour la langue active.
-        prefix = f"component.{DOMAIN}.release_notes."
+        # Textes tirés de translations/<lang>.json (catégorie "exceptions", seule
+        # catégorie hassfest acceptant du texte libre hors schémas d'entité/service).
+        # Avec repli sur l'anglais si la clé est absente pour la langue active.
+        prefix = f"component.{DOMAIN}.exceptions.release_notes_"
         translations = await async_get_translations(
-            self.hass, self.hass.config.language, "release_notes", integrations=[DOMAIN]
+            self.hass, self.hass.config.language, "exceptions", integrations=[DOMAIN]
         )
         if not any(key.startswith(prefix) for key in translations):
             translations = await async_get_translations(
-                self.hass, "en", "release_notes", integrations=[DOMAIN]
+                self.hass, "en", "exceptions", integrations=[DOMAIN]
             )
-        banner = translations.get(f"{prefix}firmware_banner", "")
-        no_description = translations.get(f"{prefix}no_description", "No description available.")
+        banner = translations.get(f"{prefix}firmware_banner.message", "")
+        no_description = translations.get(f"{prefix}no_description.message", "No description available.")
         fetch_error_status = translations.get(
-            f"{prefix}fetch_error_status", "Unable to load release notes (GitHub code: {status})"
+            f"{prefix}fetch_error_status.message", "Unable to load release notes (GitHub code: {status})"
         )
         fetch_error_exception = translations.get(
-            f"{prefix}fetch_error_exception", "Error while fetching release notes."
+            f"{prefix}fetch_error_exception.message", "Error while fetching release notes."
         )
 
         try:

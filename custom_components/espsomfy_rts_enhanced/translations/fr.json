@@ -260,10 +260,18 @@
       "description": "Lance une sauvegarde de la configuration du boîtier ESPSomfy-RTS"
     }
   },
-  "release_notes": {
-    "firmware_banner": "> **Remarque :** ceci met à jour le micrologiciel de votre carte ESP32 — un projet distinct de l'intégration Home Assistant *ESPSomfy-RTS-enhanced* installée via HACS. Leurs numéros de version sont indépendants.\n\n---\n\n",
-    "no_description": "Aucune description disponible.",
-    "fetch_error_status": "Impossible de charger les notes (Code GitHub : {status})",
-    "fetch_error_exception": "Erreur lors de la récupération des notes de version."
+  "exceptions": {
+    "release_notes_firmware_banner": {
+      "message": "> **Remarque :** ceci met à jour le micrologiciel de votre carte ESP32 — un projet distinct de l'intégration Home Assistant *ESPSomfy-RTS-enhanced* installée via HACS. Leurs numéros de version sont indépendants.\n\n---\n\n"
+    },
+    "release_notes_no_description": {
+      "message": "Aucune description disponible."
+    },
+    "release_notes_fetch_error_status": {
+      "message": "Impossible de charger les notes (Code GitHub : {status})"
+    },
+    "release_notes_fetch_error_exception": {
+      "message": "Erreur lors de la récupération des notes de version."
+    }
   }
 }

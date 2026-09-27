@@ -260,10 +260,18 @@
       "description": "Triggers a backup of the ESPSomfy-RTS device configuration"
     }
   },
-  "release_notes": {
-    "firmware_banner": "> **Note:** This updates the firmware on your ESP32 controller board — a separate project from the *ESPSomfy-RTS-enhanced* Home Assistant integration you installed via HACS. Their version numbers are independent.\n\n---\n\n",
-    "no_description": "No description available.",
-    "fetch_error_status": "Unable to load release notes (GitHub code: {status})",
-    "fetch_error_exception": "Error while fetching release notes."
+  "exceptions": {
+    "release_notes_firmware_banner": {
+      "message": "> **Note:** This updates the firmware on your ESP32 controller board — a separate project from the *ESPSomfy-RTS-enhanced* Home Assistant integration you installed via HACS. Their version numbers are independent.\n\n---\n\n"
+    },
+    "release_notes_no_description": {
+      "message": "No description available."
+    },
+    "release_notes_fetch_error_status": {
+      "message": "Unable to load release notes (GitHub code: {status})"
+    },
+    "release_notes_fetch_error_exception": {
+      "message": "Error while fetching release notes."
+    }
   }
 }

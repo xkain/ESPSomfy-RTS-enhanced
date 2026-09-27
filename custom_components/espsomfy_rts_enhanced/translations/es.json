@@ -260,10 +260,18 @@
       "description": "Inicia una copia de seguridad de la configuración del dispositivo ESPSomfy-RTS"
     }
   },
-  "release_notes": {
-    "firmware_banner": "> **Nota:** esto actualiza el firmware de tu placa controladora ESP32 — un proyecto independiente de la integración de Home Assistant *ESPSomfy-RTS-enhanced* instalada mediante HACS. Sus números de versión son independientes.\n\n---\n\n",
-    "no_description": "No hay descripción disponible.",
-    "fetch_error_status": "No se pudieron cargar las notas de la versión (código de GitHub: {status})",
-    "fetch_error_exception": "Error al obtener las notas de la versión."
+  "exceptions": {
+    "release_notes_firmware_banner": {
+      "message": "> **Nota:** esto actualiza el firmware de tu placa controladora ESP32 — un proyecto independiente de la integración de Home Assistant *ESPSomfy-RTS-enhanced* instalada mediante HACS. Sus números de versión son independientes.\n\n---\n\n"
+    },
+    "release_notes_no_description": {
+      "message": "No hay descripción disponible."
+    },
+    "release_notes_fetch_error_status": {
+      "message": "No se pudieron cargar las notas de la versión (código de GitHub: {status})"
+    },
+    "release_notes_fetch_error_exception": {
+      "message": "Error al obtener las notas de la versión."
+    }
   }
 }

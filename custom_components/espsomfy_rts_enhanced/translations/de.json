@@ -260,10 +260,18 @@
       "description": "Löst eine Sicherung der ESPSomfy-RTS-Gerätekonfiguration aus"
     }
   },
-  "release_notes": {
-    "firmware_banner": "> **Hinweis:** Dies aktualisiert die Firmware Ihres ESP32-Controllers — ein eigenständiges Projekt, getrennt von der über HACS installierten Home Assistant-Integration *ESPSomfy-RTS-enhanced*. Die Versionsnummern sind voneinander unabhängig.\n\n---\n\n",
-    "no_description": "Keine Beschreibung verfügbar.",
-    "fetch_error_status": "Versionshinweise konnten nicht geladen werden (GitHub-Code: {status})",
-    "fetch_error_exception": "Fehler beim Abrufen der Versionshinweise."
+  "exceptions": {
+    "release_notes_firmware_banner": {
+      "message": "> **Hinweis:** Dies aktualisiert die Firmware Ihres ESP32-Controllers — ein eigenständiges Projekt, getrennt von der über HACS installierten Home Assistant-Integration *ESPSomfy-RTS-enhanced*. Die Versionsnummern sind voneinander unabhängig.\n\n---\n\n"
+    },
+    "release_notes_no_description": {
+      "message": "Keine Beschreibung verfügbar."
+    },
+    "release_notes_fetch_error_status": {
+      "message": "Versionshinweise konnten nicht geladen werden (GitHub-Code: {status})"
+    },
+    "release_notes_fetch_error_exception": {
+      "message": "Fehler beim Abrufen der Versionshinweise."
+    }
   }
 }
