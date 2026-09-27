@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -24,6 +25,21 @@ class ESPSomfyEntity(CoordinatorEntity[ESPSomfyController], Entity):
         return False
 
     @property
+    def _via_device_id(self) -> str | None:
+        """Resolve the hub device's registry id for via_device_id.
+
+        via_device_id wants the hub's registry id, not its identifiers tuple,
+        and the hub device is created eagerly in async_setup_entry() so it
+        already exists by the time shade/group entities are added.
+        """
+        if self.hass is None:
+            return None
+        hub_device = dr.async_get(self.hass).async_get_device_by_identifier(
+            (DOMAIN, self.controller.unique_id), self.controller.config_entry_id
+        )
+        return hub_device.id if hub_device is not None else None
+
+    @property
     def device_info(self) -> DeviceInfo | None:
         """Device info."""
         # L'entité est liée à un Groupe spécifique
@@ -34,7 +50,7 @@ class ESPSomfyEntity(CoordinatorEntity[ESPSomfyController], Entity):
                 name=self._data.get("name", f"Group {group_id}"),
                 manufacturer=MANUFACTURER,
                 model="ESPSomfy-RTS Group",
-                via_device=(DOMAIN, self.controller.unique_id),
+                via_device_id=self._via_device_id,
             )
 
         # L'entité est liée à un Volet/Store (Shade) spécifique
@@ -45,7 +61,7 @@ class ESPSomfyEntity(CoordinatorEntity[ESPSomfyController], Entity):
                 name=self._data.get("name", f"Shade {shade_id}"),
                 manufacturer=MANUFACTURER,
                 model="ESPSomfy-RTS Device",
-                via_device=(DOMAIN, self.controller.unique_id),
+                via_device_id=self._via_device_id,
             )
 
         # (Par défaut) : L'entité est liée à la passerelle/hub globale

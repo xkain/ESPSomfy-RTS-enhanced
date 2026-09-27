@@ -8,9 +8,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceEntry
 
-from .const import DOMAIN, PLATFORMS
+from .const import DOMAIN, MANUFACTURER, PLATFORMS, VERSION
 from .controller import ESPSomfyAPI, ESPSomfyController
 
 
@@ -36,6 +37,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
     hass.config_entries.async_update_entry(entry, title=api.deviceName)
+
+    # Crée le hub explicitement avant les plateformes : les entités Volet/Groupe
+    # référencent son id via via_device_id, et les plateformes sont configurées
+    # en parallèle (leur ordre dans PLATFORMS ne garantit donc rien).
+    dr.async_get(hass).async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, controller.unique_id)},
+        configuration_url=api.get_config_url(),
+        name=controller.device_name,
+        manufacturer=MANUFACTURER,
+        model=f"ESPSomfy-RTS Enhanced Integration {VERSION}",
+        sw_version=controller.version,
+    )
 
     async def _async_ws_close(_: Event) -> None:
         await controller.ws_close()

@@ -588,8 +588,8 @@ class ESPSomfyAPI:
         if cver != new_ver:
             # print(f"Version: {cver} to {new_ver}")
             dev_registry = dr.async_get(self.hass)
-            if dev := dev_registry.async_get_device(
-                identifiers={(DOMAIN, f"espsomfy_{self.server_id}")}
+            if dev := dev_registry.async_get_device_by_identifier(
+                (DOMAIN, f"espsomfy_{self.server_id}"), self._config_entry_id
             ):
                 dev_registry.async_update_device(dev.id, sw_version=new_ver)
         self._config["version"] = new_ver
