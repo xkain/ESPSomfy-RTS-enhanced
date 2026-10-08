@@ -38,7 +38,6 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
     _attr_device_class = UpdateDeviceClass.FIRMWARE
     _attr_entity_category = EntityCategory.CONFIG
 
-    # Indique explicitement à Home Assistant de ne pas rafraîchir cette entité par lui-même
     _attr_should_poll = False
 
     _attr_has_entity_name = True
@@ -56,7 +55,6 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         self._app_progress = 100
         self._total_progress = 100
 
-        # Sécurité au démarrage : On applique les fonctionnalités de base
         self._attr_supported_features = (
             UpdateEntityFeature.SPECIFIC_VERSION
             | UpdateEntityFeature.PROGRESS
@@ -75,14 +73,12 @@ class ESPSomfyRTSUpdateEntity(ESPSomfyEntity, UpdateEntity):
         elif self._controller.data["event"] == EVT_FWSTATUS:
             evt_data = self._controller.data
 
-            # Changé de .error à .debug pour ne plus polluer les logs de l'utilisateur
             _LOGGER.debug("ESPSomfy RTS FWSTATUS Payload: %s", evt_data)
 
-            # Extraction des deux verrous de sécurité
             check_updates = evt_data.get("checkForUpdate", False)
             internet_ok = evt_data.get("inetAvailable", False)
 
-            # Le bouton d'installation ne s'active QUE si l'ESP confirme les deux conditions
+            # Installation offerte seulement si l'ESP confirme les deux
             if check_updates and internet_ok:
                 self._attr_supported_features = (
                     UpdateEntityFeature.INSTALL

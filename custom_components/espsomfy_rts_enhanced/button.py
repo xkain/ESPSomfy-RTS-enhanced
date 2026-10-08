@@ -68,7 +68,8 @@ async def async_setup_entry(
     new_entities = []
     controller: ESPSomfyController = hass.data[DOMAIN][config_entry.entry_id]
     v = version_parse(controller.version)
-    if v.major >= 2 and v.minor >= 3 and v.micro >= 0:
+    # Version comparée en entier : champ par champ, v3.0.0 échouait sur minor >= 3.
+    if v >= version_parse("2.3.0"):
         new_entities.append(
             ESPSomfyButton(
                 controller=controller,
@@ -131,7 +132,6 @@ class ESPSomfyButton(ESPSomfyEntity, ButtonEntity):
         self._controller = controller
         self._attr_device_class = cfg.device_class
 
-        # Liaison avec la description
         self.entity_description = cfg
 
         self._attr_unique_id = f"{cfg.key}_{controller.unique_id}"
@@ -142,11 +142,9 @@ class ESPSomfyButton(ESPSomfyEntity, ButtonEntity):
         self._attr_assumed_state = True
         self._attr_supported_features = cfg.features
 
-        # Application de la norme Home Assistant
         self._attr_has_entity_name = cfg.has_entity_name
         self._attr_translation_key = cfg.translation_key
 
-        # Correction ici : ajout de .api
         self._attr_object_id = f"{controller.api.deviceName.lower()}_{cfg.key}"
 
     async def async_press(self) -> None:
@@ -155,23 +153,20 @@ class ESPSomfyButton(ESPSomfyEntity, ButtonEntity):
         if "data" in self._action:
             data = self._action["data"]
 
-        # 1. Exécution de l'action initiale (Reboot ou Sauvegarde)
         if "service" in self._action:
             await self._controller.api.put_command(self._action["service"], data)
         elif "apimethod" in self._action:
             method = getattr(self._controller.api, self._action["apimethod"])
             await method()
 
-        # 2. Si c'est le bouton backup, on gère la rotation des 5 fichiers
+        # Rotation des 5 sauvegardes
         if self.entity_description.key == "backup":
             try:
-                # On récupère le chemin du dossier des sauvegardes
-                # (S'adapte dynamiquement selon l'adresse définie dans ton contrôleur)
                 backup_dir = self.hass.config.path(f"ESPSomfyRTS_{self._controller.unique_id}")
 
                 await self.hass.async_add_executor_job(_rotate_backups, backup_dir)
             except Exception:
-                # Sécurité pour éviter de bloquer l'intégration en cas d'erreur de droits sur les fichiers
+                # Un défaut de droits ne doit pas bloquer l'intégration
                 pass
 
     def _handle_coordinator_update(self) -> None:

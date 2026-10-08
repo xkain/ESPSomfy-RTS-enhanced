@@ -10,14 +10,15 @@ import os
 import threading
 from threading import Timer
 from typing import Any
+from urllib.parse import quote
 
 import aiofiles
 import aiohttp
-from packaging.version import parse as version_parse
+from packaging.version import InvalidVersion, parse as version_parse
 import websocket
 
 from homeassistant.components.cover import CoverDeviceClass, CoverEntityFeature
-from homeassistant.const import CONF_HOST, CONF_PIN, CONF_USERNAME, Platform
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PIN, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import (
@@ -35,6 +36,8 @@ from .const import (
     API_GROUPCOMMAND,
     API_GROUPS,
     API_LOGIN,
+    API_SAVESCHEDULE,
+    API_SCHEDULES,
     API_SETPOSITIONS,
     API_SETSENSOR,
     API_SHADECOMMAND,
@@ -46,6 +49,8 @@ from .const import (
     EVT_FWSTATUS,
     EVT_GROUPSTATE,
     EVT_MEMSTATUS,
+    EVT_SCHEDULEREMOVED,
+    EVT_SCHEDULESTATE,
     EVT_SHADEADDED,
     EVT_SHADECOMMAND,
     EVT_SHADEREMOVED,
@@ -63,11 +68,20 @@ class SocketListener(threading.Thread):
     """A listener of sockets."""
 
     def __init__(
-        self, hass: HomeAssistant, url: str, onpacket, onopen, onclose, onerror
+        self, hass: HomeAssistant, url, onpacket, onopen, onclose, onerror
     ) -> None:
-        """Initialize a new socket listener."""
+        """Initialize a new socket listener.
+
+        `url` may be a string or a callable returning one. It is a callable here so that
+        every reconnection re-reads it: the handshake carries the api key as a query
+        parameter, and that key is HMAC(secret, "<credentials>:<client IP>"). A key frozen
+        at construction goes stale the moment the PIN changes on the device -- which also
+        revokes the open sessions -- or Home Assistant's DHCP lease moves. The reconnect
+        loop then retried for ever with a dead key, silently, until the config entry was
+        reloaded.
+        """
         super().__init__()
-        self.url = url
+        self._url = url
         self.onpacket = onpacket
         self.onopen = onopen
         self.onclose = onclose
@@ -81,6 +95,11 @@ class SocketListener(threading.Thread):
         self.running_future = None
         self.reconnects = 0
         self._connect_timer = None
+
+    @property
+    def url(self) -> str:
+        """Resolve the socket url, freshly, at each connection attempt."""
+        return self._url() if callable(self._url) else self._url
 
     def __enter__(self):
         """Start the thread."""
@@ -220,6 +239,8 @@ class ESPSomfyController(DataUpdateCoordinator):
         self.config_entry_id = config_entry_id
         self.api = api
         self.ws_listener = None
+        # Un seul renouvellement de clé par série d'échecs, réarmé à la réouverture.
+        self._reauth_tried = False
 
     @property
     def device_name(self) -> str:
@@ -277,7 +298,8 @@ class ESPSomfyController(DataUpdateCoordinator):
             self.ws_listener.close()
         self.ws_listener = SocketListener(
             self.hass,
-            self.api.get_sock_url(),
+            # La méthode, pas son résultat : rappelée à chaque reconnexion.
+            self.api.get_sock_url,
             self.ws_onpacket,
             self.ws_onopen,
             self.ws_onclose,
@@ -296,6 +318,8 @@ class ESPSomfyController(DataUpdateCoordinator):
                 EVT_WIFISTRENGTH,
                 EVT_ETHERNET,
                 EVT_MEMSTATUS,
+                EVT_SCHEDULESTATE,
+                EVT_SCHEDULEREMOVED,
             ]
         )
         await self.ws_listener.connect()
@@ -334,8 +358,7 @@ class ESPSomfyController(DataUpdateCoordinator):
         )
         dev_class = CoverDeviceClass.SHADE
 
-        # On ne force plus device_id pour laisser HA générer l'appareil
-        # basé sur le DeviceInfo de la classe de l'entité.
+        # Pas de device_id forcé : HA crée l'appareil depuis le DeviceInfo.
         entities.async_get_or_create(
             domain=DOMAIN,
             platform=Platform.COVER,
@@ -388,7 +411,7 @@ class ESPSomfyController(DataUpdateCoordinator):
                 case _:
                     dev_class = CoverDeviceClass.SHADE
 
-        # Retrait du device_id en dur pour permettre la création de l'appareil dédié
+        # Pas de device_id forcé : HA crée l'appareil dédié.
         entities.async_get_or_create(
             domain=DOMAIN,
             platform=Platform.COVER,
@@ -416,6 +439,8 @@ class ESPSomfyController(DataUpdateCoordinator):
 
     def ws_onopen(self):
         """Websocket is opened."""
+        # Réarmé, sinon une clé périmée plus tard ne serait jamais rattrapée.
+        self._reauth_tried = False
         _LOGGER.debug("ESPSomfy-RTS Socket was opened")
         if self.api.is_configured:
             _LOGGER.debug("ESPSomfy-RTS Already Configured")
@@ -431,6 +456,20 @@ class ESPSomfyController(DataUpdateCoordinator):
         """Socket closed."""
         data = {"event": EVT_CONNECTED, "connected": False}
         self.async_set_updated_data(data=data)
+        # Fermetures répétées : clé de poignée de main probablement périmée, on la
+        # renouvelle une fois. Le seuil évite un /login à chaque coupure isolée.
+        if self.ws_listener is None or self.ws_listener.reconnects < 3:
+            return
+        if self._reauth_tried:
+            return
+        self._reauth_tried = True
+        self.hass.async_create_task(self._refresh_socket_key())
+
+    async def _refresh_socket_key(self) -> None:
+        """Renew the api key, then reopen the socket with it."""
+        self.api.clear_api_key()
+        await self.api.ensure_authenticated()
+        await self.ws_connect()
 
 class ESPSomfyAPI:
     """API for sending data to ESPSomfy-RTS hardware device."""
@@ -450,6 +489,46 @@ class ESPSomfyAPI:
         self._can_update = False
         self._config_entry_id = config_entry_id
         self._configured = False
+        # Aucun identifiant stocké : à distinguer d'« appareil injoignable », qui lui
+        # mérite des reprises.
+        self._needs_credentials = False
+        # Identifiants présents mais refusés, typiquement périmés d'un mode précédent.
+        self._bad_credentials = False
+
+    @property
+    def needs_credentials(self) -> bool:
+        """True when setup failed only for want of credentials on the config entry."""
+        return self._needs_credentials
+
+    @property
+    def bad_credentials(self) -> bool:
+        """True when the device rejected the credentials stored on the config entry."""
+        return self._bad_credentials
+
+    @property
+    def supports_remote_rssi(self) -> bool:
+        """True when the firmware fills lastRssi on each entry of linkedRemotes.
+
+        Both lines do expose linkedRemotes, but only 3.x attaches a per-remote signal level
+        to it: on 2.x, SomfyLinkedRemote carries no RSSI field at all, so a sensor built on
+        it would read "unknown" for ever.
+
+        Entities are withheld ONLY when a major version below 3 has been positively
+        determined. An unparseable version string keeps the original behaviour rather than
+        stripping a 3.x device of its sensors over a parsing error.
+        """
+        reported = self._config.get("version")
+        if not reported:
+            # Pas encore connue : on ne retire rien.
+            return True
+        try:
+            return version_parse(reported).major >= 3
+        except InvalidVersion:
+            _LOGGER.debug(
+                "Unparseable firmware version %r, assuming per-remote RSSI is available",
+                reported,
+            )
+            return True
 
     @property
     def shades(self) -> Any:
@@ -544,8 +623,21 @@ class ESPSomfyAPI:
         """Get the current host."""
         return self._host
 
+    def clear_api_key(self) -> None:
+        """Drop the stored api key so the next authentication fetches a fresh one."""
+        self._config.pop("apiKey", None)
+        self._headers["apikey"] = ""
+
     def get_sock_url(self):
-        """Get the socket interface url."""
+        """Get the socket interface url.
+
+        v3 firmware with "Full" security rejects the handshake unless the
+        apikey is present as a query parameter ("/?apikey=..."); v2.x
+        firmware, which never checks for one, simply ignores it.
+        """
+        api_key = self._headers.get("apikey", "")
+        if api_key:
+            return f"{self._sock_url}/?apikey={quote(api_key, safe='')}"
         return self._sock_url
 
     def get_api_url(self):
@@ -705,6 +797,26 @@ class ESPSomfyAPI:
                 self._needsKey = True
         self.set_firmware(data)
 
+    def _has_credentials(self) -> bool:
+        """True when the config entry actually carries something to log in with.
+
+        An entry created while the device had no security stores only its host. Logging in
+        with that empty payload cannot succeed -- the firmware answers "Invalid Pin Entry",
+        which surfaces as a misleading `invalid_pin` -- and each attempt counts against the
+        firmware's brute-force quota: three free tries, then a lock. A device switched to
+        "Full" security answers 401 on every route, so setup retries, and each retry burned
+        another attempt.
+        """
+        return any(self._login_payload().values())
+
+    def _login_payload(self) -> dict[str, str]:
+        """Build a login payload from the credentials stored on the config entry."""
+        return {
+            "username": self.data.get(CONF_USERNAME, ""),
+            "password": self.data.get(CONF_PASSWORD, ""),
+            "pin": self.data.get(CONF_PIN, ""),
+        }
+
     async def discover(self) -> Any | None:
         """Discover the device on the network."""
         url = f"{self._api_url}{API_DISCOVERY}"
@@ -713,12 +825,56 @@ class ESPSomfyAPI:
                 data = await resp.json()
                 self.apply_data(data)
                 return data
+            if resp.status != 401:
+                _LOGGER.error(await resp.text())
+                raise DiscoveryError(f"{url} - {await resp.text()}")
+
+        # v3 firmware with "Full" security requires authentication before it
+        # will even answer /discovery (v2.x always answered it publicly, so
+        # this branch is never taken against v2.x devices). Log in with
+        # whatever credentials were provided, then retry once.
+        if not self._has_credentials():
+            raise DiscoveryError(
+                f"{url} - authentication required but no credentials are stored"
+            )
+        await self._do_login(self._login_payload())
+        async with self._session.get(url, headers=self._headers) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                self.apply_data(data)
+                return data
             _LOGGER.error(await resp.text())
             raise DiscoveryError(f"{url} - {await resp.text()}")
 
+    async def fetch_login_context(self) -> Any | None:
+        """Fetch /loginContext.
+
+        hardwareProfile (and a few other device-identity fields) only live here, not on the
+        port-8081 REST API this class otherwise talks to entirely - /loginContext is served by
+        the main web server (port 80, self._config_url), so this is the one call that targets
+        it instead of self._api_url.
+
+        The route itself has been around for a long time - rstrouse's firmware serves it as
+        far back as v2.4.7, with type/permissions/serverId/version/model/hostname - but the
+        hardwareProfile, resetReason, uptime and netUptime fields are specific to 3.x. Callers
+        therefore test for each field's presence rather than for a version, and a non-200 stays
+        at debug level: old firmware, or a missing route, is not a fault.
+        """
+        url = f"{self._config_url}/loginContext"
+        try:
+            async with self._session.get(url, headers=self._headers) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                _LOGGER.debug(await resp.text())
+        except aiohttp.ClientError as e:
+            _LOGGER.error("Error fetching /loginContext: %s", e)
+        return None
+
     async def load_shades(self) -> Any | None:
         """Load all the shades from the controller."""
-        async with self._session.get(f"{self._api_url}{API_SHADES}") as resp:
+        async with self._session.get(
+            f"{self._api_url}{API_SHADES}", headers=self._headers
+        ) as resp:
             if resp.status == 200:
                 self._config["shades"] = await resp.json()
                 return self._config["shades"]
@@ -726,11 +882,49 @@ class ESPSomfyAPI:
 
     async def load_groups(self) -> Any | None:
         """Load all the groups from the controller."""
-        async with self._session.get(f"{self._api_url}{API_GROUPS}") as resp:
+        async with self._session.get(
+            f"{self._api_url}{API_GROUPS}", headers=self._headers
+        ) as resp:
             if resp.status == 200:
                 self._config["groups"] = await resp.json()
                 return self._config["groups"]
             _LOGGER.error(await resp.text())
+
+    async def load_schedules(self) -> Any | None:
+        """Load all the schedules from the controller.
+
+        /schedules only exists from firmware v3.0.0 onward. On the 2.x line the route is
+        simply absent, so a 404 here is the expected shape of "this device has no
+        schedules" - not a fault. Logging it as an error surfaced a red "custom
+        integration error" in the UI at every start, twice over, since both the switch
+        and the sensor platform call this. Same treatment as fetch_login_context().
+        """
+        async with self._session.get(
+            f"{self._api_url}{API_SCHEDULES}", headers=self._headers
+        ) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            if resp.status == 404:
+                _LOGGER.debug("No /schedules route on %s: firmware predates v3", self._host)
+            else:
+                _LOGGER.error(await resp.text())
+        return None
+
+    async def set_schedule_enabled(self, schedule_id: int, enabled: bool) -> None:
+        """Enable or disable a schedule.
+
+        /schedule (API_SCHEDULES' single-item sibling) is GET-only by design - the write path
+        is the separate /saveSchedule. A partial payload is enough: ScheduleRule::fromJSON()
+        (firmware) only mutates the fields present in the body, same contract already relied
+        on by MQTT's schedules/<id>/enabled/set.
+        """
+        async with self._session.put(
+            f"{self._api_url}{API_SAVESCHEDULE}",
+            json={"id": schedule_id, "enabled": enabled},
+            headers=self._headers,
+        ) as resp:
+            if resp.status != 200:
+                _LOGGER.error(await resp.text())
 
     async def tilt_open(self, shade_id: int):
         """Send the command to open the tilt."""
@@ -825,79 +1019,172 @@ class ESPSomfyAPI:
         await self.put_command(API_SETSENSOR, {"shadeId": shade_id, "windy": windy})
 
     async def put_command(self, command, data):
-        """Send a put command to the device."""
-        async with self._session.put(f"{self._api_url}{command}", json=data) as resp:
+        """Send a put command to the device, re-authenticating once on a 401.
+
+        The firmware's token is HMAC(secret, "<credentials>:<client IP>"), so a key that
+        was valid can stop being so without anything failing visibly here: the PIN was
+        changed on the device, or Home Assistant's DHCP lease moved. Without this retry
+        the commands simply stopped working until the config entry was reloaded, with a
+        single line in the log and no other symptom.
+        """
+        async with self._session.put(
+            f"{self._api_url}{command}", json=data, headers=self._headers
+        ) as resp:
             if resp.status == 200:
-                pass
-            else:
+                return
+            if resp.status != 401:
                 _LOGGER.error(await resp.text())
+                return
+        # 401: the stored key is stale. Log in again and replay the command once. A second
+        # failure is reported and not retried, so a wrong PIN cannot loop on /login and
+        # burn through the firmware's brute-force quota.
+        try:
+            self._headers["apikey"] = ""
+            await self._do_login(self._login_payload())
+        except (aiohttp.ClientError, LoginError) as err:
+            _LOGGER.error("Could not re-authenticate to replay %s: %s", command, err)
+            return
+        async with self._session.put(
+            f"{self._api_url}{command}", json=data, headers=self._headers
+        ) as retry:
+            if retry.status != 200:
+                _LOGGER.error(await retry.text())
+
+    async def _do_login(self, data) -> None:
+        """Actually PUT the login request and store the returned apiKey.
+
+        Unlike login(), this is not gated on _canLogin: it is also the retry
+        path discover()/get_initial() use when a v3 "Full"-security device
+        answers 401 before authType is even known (see login() below).
+        """
+        async with self._session.put(
+            f"{self._api_url}{API_LOGIN}", json=data
+        ) as resp:
+            if resp.status == 200:
+                result = await resp.json()
+                if result.get("success"):
+                    if "apiKey" in result:
+                        self._config["apiKey"] = self._headers["apikey"] = result[
+                            "apiKey"
+                        ]
+                else:
+                    if "type" in result:
+                        if result["type"] == 1:
+                            raise LoginError(CONF_PIN, "invalid_pin")
+                        if result["type"] == 2:
+                            raise LoginError(CONF_USERNAME, "invalid_password")
+                    raise LoginError(CONF_HOST, "invalid_login")
+            elif resp.status == 429:
+                # The firmware's brute-force guard (WebAuth.cpp) - distinct from a real bad
+                # credential so the UI can say "wait N seconds" instead of "wrong password",
+                # which previously pushed people to immediately retry and re-trigger the lock.
+                result = await resp.json()
+                _LOGGER.error("Error logging in: %s", result)
+                raise LoginError(CONF_HOST, "too_many_attempts", result.get("retryAfter", 0))
+            else:
+                _LOGGER.error("Error logging in: %s", await resp.text())
+                raise LoginError(CONF_HOST, "login_error")
 
     async def login(self, data):
-        """Log in to the EPSSomfy hardware device."""
-        if self._canLogin:
-            async with self._session.put(
-                f"{self._api_url}{API_LOGIN}", json=data
-            ) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    if data.get("success"):
-                        if "apiKey" in data:
-                            self._config["apiKey"] = self._headers["apikey"] = data[
-                                "apiKey"
-                            ]
-                    else:
-                        if "type" in data:
-                            if data["type"] == 1:
-                                raise LoginError(CONF_PIN, "invalid_pin")
-                            if data["type"] == 2:
-                                raise LoginError(CONF_USERNAME, "invalid_password")
-                        raise LoginError(CONF_HOST, "invalid_login")
+        """Log in to the EPSSomfy hardware device.
 
-                else:
-                    _LOGGER.error("Error logging in: %s", await resp.text())
-                    raise LoginError(f"{self._api_url} - {await resp.text()}")
+        No-op if discover() already bootstrapped an apiKey (v3 "Full"-security
+        devices reject /discovery until authenticated, so discover() logs in
+        itself) -- otherwise this would fire a second, redundant /login PUT
+        right after, burning through the firmware's brute-force attempt quota
+        twice as fast for no benefit.
+        """
+        if self._headers.get("apikey"):
+            return
+        if self._canLogin:
+            await self._do_login(data)
 
     async def group_command(self, data):
         """Send commands to ESPSomfy-RTS via PUT request."""
-        async with self._session.put(
-            f"{self._api_url}{API_GROUPCOMMAND}", json=data
-        ) as resp:
-            if resp.status == 200:
-                pass
-            else:
-                _LOGGER.error(await resp.text())
+        await self.put_command(API_GROUPCOMMAND, data)
 
     async def tilt_command(self, data):
         """Send tilt commands to ESPSomfy-RTS via PUT request."""
-        async with self._session.put(
-            f"{self._api_url}{API_TILTCOMMAND}", json=data
-        ) as resp:
-            if resp.status == 200:
-                pass
-            else:
-                _LOGGER.error(await resp.text())
+        await self.put_command(API_TILTCOMMAND, data)
+
+    async def ensure_authenticated(self) -> None:
+        """Obtain an api key when the device declares security, without waiting for a 401.
+
+        No-op when security is disabled (authType 0) or when a key is already held -- the
+        latter guard also keeps discover()'s bootstrap from firing a second, redundant
+        /login right after, which would burn the firmware's brute-force quota twice as fast.
+        """
+        if self._headers.get("apikey"):
+            return
+        if int(self._config.get("authType", 0)) <= 0:
+            return
+        if not self._has_credentials():
+            # Rien à envoyer : une tentative à vide userait le quota à chaque démarrage.
+            _LOGGER.warning(
+                "ESPSomfy-RTS (%s) requires authentication but no credentials are stored for "
+                "this entry: state and commands keep working, configuration-level features "
+                "(backup, reboot, firmware update, remote addresses) stay unavailable. "
+                "Reconfigure the integration to supply the PIN or password",
+                self._host,
+            )
+            return
+        try:
+            await self._do_login(self._login_payload())
+        except (aiohttp.ClientError, LoginError) as err:
+            # Degrade instead of failing setup: in "config only" mode the dashboard, the
+            # state and the commands all keep working without a key.
+            _LOGGER.warning(
+                "ESPSomfy-RTS: could not authenticate, configuration-level features "
+                "(backup, reboot, firmware update, remote addresses) stay unavailable: %s",
+                err,
+            )
 
     async def get_initial(self):
         """Get the initial config from ESPSomfy-RTS."""
         try:
             self._session = aiohttp_client.async_get_clientsession(self.hass)
-            async with self._session.get(f"{self._api_url}{API_DISCOVERY}") as resp:
+            url = f"{self._api_url}{API_DISCOVERY}"
+            async with self._session.get(url, headers=self._headers) as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    self.apply_data(data)
-                    entry = self.hass.config_entries.async_get_entry(
-                        self._config_entry_id
-                    )
-                    if not self._configured:
-                        _LOGGER.debug("ESPSomfy-RTS Setting up entities")
-                        await self.hass.config_entries.async_forward_entry_setups(
-                            entry, PLATFORMS
-                        )
-                        self._configured = True
+                elif resp.status == 401:
+                    # Same bootstrap as discover(): a "Full"-security device rejects the
+                    # unauthenticated first attempt, so log in with the credentials stored on
+                    # the config entry and retry once.
+                    if not self._has_credentials():
+                        # Muet : async_setup_entry lève AuthFailed, l'invite suffit.
+                        self._needs_credentials = True
+                        return
+                    try:
+                        await self._do_login(self._login_payload())
+                    except LoginError as err:
+                        # 429 n'est pas un mauvais identifiant : verrou temporaire, on
+                        # laisse les reprises faire.
+                        if len(err.args) > 1 and err.args[1] != "too_many_attempts":
+                            self._bad_credentials = True
+                        raise
+                    async with self._session.get(url, headers=self._headers) as retry_resp:
+                        if retry_resp.status != 200:
+                            _LOGGER.error(await retry_resp.text())
+                            return
+                        data = await retry_resp.json()
                 else:
                     _LOGGER.error(await resp.text())
-        except aiohttp.ClientError:
-            pass
+                    return
+
+            self.apply_data(data)
+            # En "config seule" rien ne répond 401 : on se connecte dès qu'une sécurité est
+            # déclarée. Non fatal, état et commandes marchent sans clé.
+            await self.ensure_authenticated()
+            entry = self.hass.config_entries.async_get_entry(self._config_entry_id)
+            if not self._configured:
+                _LOGGER.debug("ESPSomfy-RTS Setting up entities")
+                await self.hass.config_entries.async_forward_entry_setups(
+                    entry, PLATFORMS
+                )
+                self._configured = True
+        except (aiohttp.ClientError, LoginError) as e:
+            _LOGGER.error("ESPSomfy-RTS could not authenticate or connect: %s", e)
 
     async def fetch_release_notes(self, version: str) -> str | None:
         """Télécharge les notes de version depuis l'API GitHub."""
@@ -907,9 +1194,8 @@ class ESPSomfyAPI:
             "User-Agent": "HomeAssistant-ESPSomfyRTS-Integration"
         }
 
-        # Textes tirés de translations/<lang>.json (catégorie "exceptions", seule
-        # catégorie hassfest acceptant du texte libre hors schémas d'entité/service).
-        # Avec repli sur l'anglais si la clé est absente pour la langue active.
+        # Catégorie "exceptions" : la seule que hassfest laisse en texte libre.
+        # Repli sur l'anglais si la clé manque.
         prefix = f"component.{DOMAIN}.exceptions.release_notes_"
         translations = await async_get_translations(
             self.hass, self.hass.config.language, "exceptions", integrations=[DOMAIN]

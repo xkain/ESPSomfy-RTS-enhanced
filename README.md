@@ -83,32 +83,3 @@ Once installed and Home Assistant is restarted, the integration will **automatic
 
 
 <img width="1006" height="470" alt="Capture d&#39;écran_20260527_113106" src="https://github.com/user-attachments/assets/46870a36-816e-406b-bb55-51aa91e7f178" />
-
----
-
-## Event Management (Events)
-
-The integration emits events on the Home Assistant event bus for every intercepted command (whether it originates from HA, a physical remote control, or the ESP web interface). These events use the `espsomfy-rts_event` type.
-
-### Event Payload Structure
-
-| Key | Description  |
-| :--- | :--- |
-| `entity_id` | The target entity ID in Home Assistant (e.g., `cover.living_room_shade`). |
-| `event_key` | The event trigger (currently always set to `shadeCommand`). |
-| `name` | The friendly name assigned to the device. |
-| `remote_address` | The radio address defined for the motor in ESPSomfy RTS. |
-| `source_address` | The source device address (remote control channel address or group address). |
-
-### Values for `source` (Command Origin)
-* `remote`: The user pressed a button on a physical remote control.
-* `internal`: The command was initiated from the ESPSomfy RTS internal interface.
-* `group`: The command was part of a grouped action.
-
-### Values for `command` (Intercepted Actions)
-* `Up` / `Down` / `My`: Standard commands (Up, Down, Stop/Favorite Position).
-* `StepUp` / `StepDown`: Step-by-step micro-adjustments.
-* `Prog`: Program button press.
-* `My+Up` / `My+Down` / `Up+Down` / `My+Up+Down`: Simultaneous physical key combinations.
-
-

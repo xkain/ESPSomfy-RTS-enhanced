@@ -4,15 +4,29 @@ from __future__ import annotations
 
 from typing import Any
 
+import aiohttp
+
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, EVT_CONNECTED, EVT_GROUPSTATE, EVT_SHADESTATE
+from .const import (
+    DOMAIN,
+    EVT_CONNECTED,
+    EVT_GROUPSTATE,
+    EVT_SCHEDULEREMOVED,
+    EVT_SCHEDULESTATE,
+    EVT_SHADESTATE,
+)
 from .controller import ESPSomfyController
-from .entity import ESPSomfyEntity
+from .entity import (
+    ESPSomfyEntity,
+    async_get_schedule_time_labels,
+    resolve_schedule_target,
+    schedule_time_label,
+)
 
 
 async def async_setup_entry(
@@ -28,7 +42,7 @@ async def async_setup_entry(
         for shade in controller.api.shades:
             try:
                 if "shadeType" in shade and (
-                    int(shade["shadeType"]) == 9 or int(shade["shadeType"] == 10)
+                    int(shade["shadeType"]) == 9 or int(shade["shadeType"]) == 10
                 ):
                     new_entities.append(
                         ESPSomfyBinarySwitch(controller=controller, data=shade)
@@ -57,6 +71,27 @@ async def async_setup_entry(
 
             except KeyError:
                 pass
+
+        # A transient failure here must not take down shade/group switches above.
+        try:
+            schedules = await controller.api.load_schedules() or []
+        except aiohttp.ClientError:
+            schedules = []
+        if schedules:
+            sun_labels = await async_get_schedule_time_labels(hass)
+            for schedule in schedules:
+                target = resolve_schedule_target(
+                    controller, schedule.get("targetType"), schedule.get("targetId")
+                )
+                new_entities.append(
+                    ESPSomfyScheduleSwitch(
+                        controller=controller,
+                        schedule=schedule,
+                        target=target,
+                        time_label=schedule_time_label(schedule, sun_labels),
+                    )
+                )
+
     if new_entities:
         async_add_entities(new_entities)
 
@@ -217,3 +252,74 @@ class ESPSomfyBinarySwitch(ESPSomfyEntity, SwitchEntity):
                 await self.coordinator.api.close_shade(self._shade_id)
         else:
             await self.coordinator.api.toggle_shade(self._shade_id)
+
+
+class ESPSomfyScheduleSwitch(ESPSomfyEntity, SwitchEntity):
+    """Enables/disables one schedule - the HA-side twin of MQTT's schedules/<id>/enabled/set.
+
+    Attached to the shade/group the schedule targets (resolve_schedule_target()), not the
+    hub, so it shows up alongside that equipment's other entities. No live push exists for a
+    schedule created/deleted after startup (same limitation as shades: see controller.py's
+    ws_onpacket comment) - only enabled/nextTime update live, via scheduleState.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "schedule_enabled"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_icon = "mdi:calendar-clock"
+    _attr_should_poll = False
+
+    def __init__(
+        self,
+        *,
+        controller: ESPSomfyController,
+        schedule: any,
+        target: any,
+        time_label: str = "",
+    ) -> None:
+        """Initialize a new schedule switch."""
+        super().__init__(data=target, controller=controller)
+        self._controller = controller
+        self._schedule_id = schedule["id"]
+        self._attr_unique_id = (
+            f"{controller.unique_id}_schedule_{self._schedule_id}_enabled"
+        )
+        self._attr_translation_placeholders = {
+            "name": schedule.get("name") or str(self._schedule_id),
+            "time": time_label,
+        }
+        self._available = True
+        self._attr_is_on = bool(schedule.get("enabled"))
+
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        d = self._controller.data
+        evt = d.get("event", "")
+        if evt == EVT_CONNECTED:
+            if "connected" in d and self._available != bool(d["connected"]):
+                self._available = bool(d["connected"])
+                self.async_write_ha_state()
+            return
+        if evt not in (EVT_SCHEDULESTATE, EVT_SCHEDULEREMOVED) or d.get("id") != self._schedule_id:
+            return
+        if evt == EVT_SCHEDULESTATE:
+            is_on = bool(d.get("enabled"))
+            if is_on != self._attr_is_on:
+                self._attr_is_on = is_on
+                self.async_write_ha_state()
+        else:
+            self._available = False
+            self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await self.coordinator.api.set_schedule_enabled(self._schedule_id, True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await self.coordinator.api.set_schedule_enabled(self._schedule_id, False)
+
+    @property
+    def available(self) -> bool:
+        """Indicates whether the schedule switch is available."""
+        return self._available

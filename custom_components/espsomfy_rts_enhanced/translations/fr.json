@@ -2,7 +2,8 @@
   "config": {
     "abort": {
       "no_devices_found": "Aucun appareil trouvé sur le réseau",
-      "single_instance_allowed": "Déjà configuré. Seule une configuration unique est possible."
+      "single_instance_allowed": "Déjà configuré. Seule une configuration unique est possible.",
+      "reauth_successful": "Ré-authentification réussie"
     },
     "error": {
       "cannot_connect": "Échec de la connexion",
@@ -11,7 +12,8 @@
       "unknown": "Erreur inattendue",
       "invalid_password": "Nom d'utilisateur ou mot de passe invalide",
       "invalid_pin": "Code PIN invalide",
-      "login_error": "Identifiant invalide"
+      "login_error": "Identifiant invalide",
+      "too_many_attempts": "Trop de tentatives. Réessayez dans {retry_after} secondes."
     },
     "step": {
       "confirm": {
@@ -43,6 +45,16 @@
         },
         "description": "Voulez-vous ajouter {model} avec l'identifiant du serveur {server_id} à Home Assistant ?",
         "title": "ESPSomfy-RTS Découvert"
+      },
+      "reauth_confirm": {
+        "data": {
+          "host": "Adresse hôte pour le dispositif ESPSomfy-RTS",
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "pin": "Code PIN"
+        },
+        "description": "Cet appareil demande une authentification. Saisissez le code PIN ou le mot de passe définis dans ESPSomfy-RTS pour que Home Assistant puisse s'y connecter.",
+        "title": "Authentification ESPSomfy-RTS"
       }
     }
   },
@@ -54,7 +66,8 @@
       "unknown": "Erreur inattendue",
       "invalid_password": "Nom d'utilisateur ou mot de passe invalide",
       "invalid_pin": "Code PIN invalide",
-      "login_error": "Identifiant invalide"
+      "login_error": "Identifiant invalide",
+      "too_many_attempts": "Trop de tentatives. Réessayez dans {retry_after} secondes."
     },
     "step": {
       "init": {
@@ -92,11 +105,29 @@
       }
     },
     "sensor": {
+      "remote_rssi": {
+        "name": "Émetteur {index}"
+      },
+      "schedule_next_time": {
+        "name": "{name} ({time}) prochain déclenchement"
+      },
       "host_name": {
         "name": "Nom d'hôte"
       },
       "chip_model": {
         "name": "Type de puce"
+      },
+      "hardware_profile": {
+        "name": "Profil Matériel"
+      },
+      "reset_reason": {
+        "name": "Dernier redémarrage"
+      },
+      "boot_time": {
+        "name": "Démarré"
+      },
+      "net_connected_since": {
+        "name": "Réseau connecté depuis"
       },
       "conn_type": {
         "name": "Connexion"
@@ -135,6 +166,9 @@
       },
       "dry_contact_switch": {
         "name": "Contact sec"
+      },
+      "schedule_enabled": {
+        "name": "{name} ({time})"
       }
     }
   },
@@ -261,6 +295,12 @@
     }
   },
   "exceptions": {
+    "schedule_time_sunrise": {
+      "message": "Lever du soleil"
+    },
+    "schedule_time_sunset": {
+      "message": "Coucher du soleil"
+    },
     "release_notes_firmware_banner": {
       "message": "> **Remarque :** ceci met à jour le micrologiciel de votre carte ESP32 — un projet distinct de l'intégration Home Assistant *ESPSomfy-RTS-enhanced* installée via HACS. Leurs numéros de version sont indépendants."
     },

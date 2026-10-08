@@ -79,33 +79,3 @@ Une fois installée et Home Assistant redémarré, l'intégration **détectera a
 * **Automatisations** : Tous les volets sont exposés comme des entités `cover` classiques, prêtes à être intégrées à vos tableaux de bord et à vos automatisations via les services natifs.
 
 <img width="1006" height="470" alt="Capture d&#39;écran_20260527_113106" src="https://github.com/user-attachments/assets/46870a36-816e-406b-bb55-51aa91e7f178" />
-
----
-
-## Gestion des Événements (Events)
-
-L'intégration émet des événements sur le bus de Home Assistant pour chaque commande interceptée (qu'elle vienne de HA, d'une télécommande physique ou de l'interface web de l'ESP). Ces événements utilisent le type `espsomfy-rts_event`.
-
-### Structure du Payload de l'événement
-
-| Clé | Description |
-| :--- | :--- |
-| `entity_id` | L'identifiant de l'entité cible dans Home Assistant (ex: `cover.volet_salon`). |
-| `event_key` | Le déclencheur de l'événement (actuellement toujours positionné sur `shadeCommand`). |
-| `name` | Le nom convivial attribué à l'équipement. |
-| `remote_address` | L'adresse radio définie pour le moteur dans ESPSomfy RTS. |
-| `source_address` | L'adresse de l'appareil source (adresse du canal de la télécommande ou du groupe). |
-
-### Valeurs de `source` (Origine de la commande)
-* `remote` : L'utilisateur a appuyé sur un bouton d'une télécommande physique.
-* `internal` : La commande a été initiée depuis l'interface interne de l'ESPSomfy RTS.
-* `group` : La commande fait partie d'une action groupée.
-
-### Valeurs de `command` (Actions interceptées)
-* `Up` / `Down` / `My` : Commandes standards (Monter, Descendre, Stop/Position Favorite).
-* `StepUp` / `StepDown` : Variations pas-à-pas.
-* `Prog` : Appui sur le bouton de programmation.
-* `My+Up` / `My+Down` / `Up+Down` / `My+Up+Down` : Combinaisons de touches physiques simultanées.
-
-
-

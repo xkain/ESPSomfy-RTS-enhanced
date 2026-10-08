@@ -2,7 +2,8 @@
   "config": {
     "abort": {
       "no_devices_found": "No devices found on the network",
-      "single_instance_allowed": "Already configured. Only a single configuration possible."
+      "single_instance_allowed": "Already configured. Only a single configuration is possible.",
+      "reauth_successful": "Re-authentication was successful"
     },
     "error": {
       "cannot_connect": "Failed to connect",
@@ -10,39 +11,50 @@
       "invalid_host": "Invalid hostname or IP address",
       "unknown": "Unexpected error",
       "invalid_password": "Invalid username or password",
-      "invalid_pin": "Invalid Pin",
-      "login_error": "Invalid login"
+      "invalid_pin": "Invalid PIN code",
+      "login_error": "Invalid login credentials",
+      "too_many_attempts": "Too many attempts. Try again in {retry_after} seconds."
     },
     "step": {
       "confirm": {
         "data": {
-          "host": "Host address for the ESPSomfy RTS device",
+          "host": "Host address for the ESPSomfy-RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN Code"
         },
-        "title": "Configure ESPSomfy RTS",
-        "description": "Provide the configured security options for your device"
+        "title": "Configure ESPSomfy-RTS",
+        "description": "Provide the security options configured for your device"
       },
       "user": {
         "data": {
-          "host": "Host address for the ESPSomfy RTS device",
+          "host": "Host address for the ESPSomfy-RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN Code"
         },
-        "description": "Provide the configured security options for your device",
-        "title": "Configure ESPSomfy RTS"
+        "description": "Provide the security options configured for your device",
+        "title": "Configure ESPSomfy-RTS"
       },
       "zeroconf_confirm": {
         "data": {
-          "host": "Host address for the ESPSomfy RTS device",
+          "host": "Host address for the ESPSomfy-RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN Code"
         },
-        "description": "Do you want to add {model} with server id {server_id} to Home Assistant?",
-        "title": "ESPSomfy RTS Discovered"
+        "description": "Do you want to add {model} with server ID {server_id} to Home Assistant?",
+        "title": "ESPSomfy-RTS Discovered"
+      },
+      "reauth_confirm": {
+        "data": {
+          "host": "Host address for the ESPSomfy-RTS device",
+          "username": "Username",
+          "password": "Password",
+          "pin": "PIN Code"
+        },
+        "description": "This device requires authentication. Enter the PIN or password set in ESPSomfy-RTS so that Home Assistant can connect to it.",
+        "title": "ESPSomfy-RTS authentication"
       }
     }
   },
@@ -53,20 +65,253 @@
       "invalid_host": "Invalid hostname or IP address",
       "unknown": "Unexpected error",
       "invalid_password": "Invalid username or password",
-      "invalid_pin": "Invalid Pin",
-      "login_error": "Invalid login"
+      "invalid_pin": "Invalid PIN code",
+      "login_error": "Invalid login credentials",
+      "too_many_attempts": "Too many attempts. Try again in {retry_after} seconds."
     },
     "step": {
       "init": {
         "data": {
-          "host": "Host address for the ESPSomfy RTS device",
+          "host": "Host address for the ESPSomfy-RTS device",
           "username": "Username",
           "password": "Password",
-          "pin": "Pin Number"
+          "pin": "PIN Code"
         },
-        "title": "Configure ESPSomfy RTS",
-        "description": "Provide the configured security options for your device"
+        "title": "Configure ESPSomfy-RTS",
+        "description": "Set up the security options configured for your device"
       }
+    }
+  },
+  "entity": {
+    "button": {
+      "reboot": {
+        "name": "Restart"
+      },
+      "backup": {
+        "name": "Backup"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "ESP32 Firmware"
+      }
+    },
+    "binary_sensor": {
+      "sun_sensor": {
+        "name": "Sunlight"
+      },
+      "wind_sensor": {
+        "name": "Wind"
+      }
+    },
+    "sensor": {
+      "remote_rssi": {
+        "name": "Transmitter {index}"
+      },
+      "schedule_next_time": {
+        "name": "{name} ({time}) next run"
+      },
+      "host_name": {
+        "name": "Hostname"
+      },
+      "chip_model": {
+        "name": "Chip type"
+      },
+      "hardware_profile": {
+        "name": "Hardware Profile"
+      },
+      "reset_reason": {
+        "name": "Last restart"
+      },
+      "boot_time": {
+        "name": "Started"
+      },
+      "net_connected_since": {
+        "name": "Network connected since"
+      },
+      "conn_type": {
+        "name": "Connection"
+      },
+      "wifi_sensor": {
+        "name": "Wi-Fi signal strength"
+      },
+      "wifi_ssid": {
+        "name": "Wi-Fi SSID"
+      },
+      "wifi_channel": {
+        "name": "Wi-Fi channel"
+      },
+      "eth_speed": {
+        "name": "Connection speed"
+      },
+      "eth_full_duplex": {
+        "name": "Full Duplex"
+      },
+      "free_memory": {
+        "name": "Free memory"
+      },
+      "max_memory": {
+        "name": "Maximum memory"
+      },
+      "min_memory": {
+        "name": "Minimum memory"
+      },
+      "ip_addresss": {
+        "name": "IP address"
+      }
+    },
+    "switch": {
+      "sun_mode_switch": {
+        "name": "Sun sensor"
+      },
+      "dry_contact_switch": {
+        "name": "Dry contact"
+      },
+      "schedule_enabled": {
+        "name": "{name} ({time})"
+      }
+    }
+  },
+  "services": {
+    "open_shade": {
+      "name": "Open shade",
+      "description": "Opens the shade completely"
+    },
+    "close_shade": {
+      "name": "Close shade",
+      "description": "Closes the shade completely"
+    },
+    "stop_shade": {
+      "name": "Stop shade",
+      "description": "Stops the shade at its current position"
+    },
+    "set_shade_position": {
+      "name": "Set position",
+      "description": "Sets the shade opening position in percentage",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "The target position of the shade"
+        }
+      }
+    },
+    "tilt_open": {
+      "name": "Open tilt",
+      "description": "Tilts the slats to the open position"
+    },
+    "tilt_close": {
+      "name": "Close tilt",
+      "description": "Tilts the slats to the closed position"
+    },
+    "set_tilt_position": {
+      "name": "Set tilt position",
+      "description": "Sets the tilt position of the slats in percentage",
+      "fields": {
+        "tilt_position": {
+          "name": "Tilt position",
+          "description": "The target tilt of the slats"
+        }
+      }
+    },
+    "set_current_position": {
+      "name": "Force current position",
+      "description": "Sets the current position in HA without operating the motor",
+      "fields": {
+        "position": {
+          "name": "Position",
+          "description": "The position value to save"
+        }
+      }
+    },
+    "set_current_tilt_position": {
+      "name": "Force current tilt position",
+      "description": "Sets the current tilt position in HA without operating the motor",
+      "fields": {
+        "tilt_position": {
+          "name": "Tilt position",
+          "description": "The tilt value to save"
+        }
+      }
+    },
+    "set_sunny": {
+      "name": "Set sunlight status",
+      "description": "Sends a command to the motor indicating whether it is sunny or not",
+      "fields": {
+        "sunny": {
+          "name": "Sunny",
+          "description": "Check if it is sunny"
+        }
+      }
+    },
+    "set_windy": {
+      "name": "Set wind status",
+      "description": "Sends a command to the motor indicating whether it is windy or not",
+      "fields": {
+        "windy": {
+          "name": "Windy",
+          "description": "Check if it is windy"
+        }
+      }
+    },
+    "send_command": {
+      "name": "Send RTS command",
+      "description": "Sends any raw command using the RTS protocol",
+      "fields": {
+        "command": {
+          "name": "Command",
+          "description": "The RTS command to send"
+        },
+        "repeat": {
+          "name": "Repeat",
+          "description": "Number of times the command will be repeated"
+        }
+      }
+    },
+    "send_step_command": {
+      "name": "Send step command",
+      "description": "Sends a step-by-step movement command",
+      "fields": {
+        "direction": {
+          "name": "Direction",
+          "description": "The direction of the step (Up / Down)"
+        },
+        "step_size": {
+          "name": "Step size",
+          "description": "The size of the step (127 being the maximum)"
+        },
+        "repeat": {
+          "name": "Repeat",
+          "description": "Number of times the command will be repeated"
+        }
+      }
+    },
+    "reboot": {
+      "name": "Restart",
+      "description": "Triggers a restart of the ESPSomfy-RTS device"
+    },
+    "backup": {
+      "name": "Backup",
+      "description": "Triggers a backup of the ESPSomfy-RTS device configuration"
+    }
+  },
+  "exceptions": {
+    "schedule_time_sunrise": {
+      "message": "Sunrise"
+    },
+    "schedule_time_sunset": {
+      "message": "Sunset"
+    },
+    "release_notes_firmware_banner": {
+      "message": "> **Note:** This updates the firmware on your ESP32 controller board — a separate project from the *ESPSomfy-RTS-enhanced* Home Assistant integration you installed via HACS. Their version numbers are independent."
+    },
+    "release_notes_no_description": {
+      "message": "No description available."
+    },
+    "release_notes_fetch_error_status": {
+      "message": "Unable to load release notes (GitHub code: {status})"
+    },
+    "release_notes_fetch_error_exception": {
+      "message": "Error while fetching release notes."
     }
   }
 }
