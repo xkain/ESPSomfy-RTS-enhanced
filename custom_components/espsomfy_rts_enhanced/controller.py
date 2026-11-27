@@ -489,6 +489,7 @@ class ESPSomfyAPI:
         self._can_update = False
         self._config_entry_id = config_entry_id
         self._configured = False
+        self.connect_error: Exception | None = None
         # Aucun identifiant stocké : à distinguer d'« appareil injoignable », qui lui
         # mérite des reprises.
         self._needs_credentials = False
@@ -1184,7 +1185,10 @@ class ESPSomfyAPI:
                 )
                 self._configured = True
         except (aiohttp.ClientError, LoginError) as e:
-            _LOGGER.error("ESPSomfy-RTS could not authenticate or connect: %s", e)
+            # Setup raises ConfigEntryNotReady with this, and Home Assistant logs that once
+            # and retries quietly; an error here repeated on every retry while the device is off.
+            self.connect_error = e
+            _LOGGER.debug("ESPSomfy-RTS could not authenticate or connect: %s", e)
 
     async def fetch_release_notes(self, version: str) -> str | None:
         """Télécharge les notes de version depuis l'API GitHub."""

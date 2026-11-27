@@ -44,6 +44,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
         raise ConfigEntryNotReady(
             f"Could not find ESPSomfy-RTS device with address {api.get_api_url()}"
+            + (f": {api.connect_error}" if api.connect_error else "")
         )
 
     hass.config_entries.async_update_entry(entry, title=api.deviceName)
